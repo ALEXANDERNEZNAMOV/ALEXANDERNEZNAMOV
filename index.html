@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060B1C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Тренажёр ГАП">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  html{color-scheme:light}
+  body{margin:0;font-size:14px;-webkit-text-size-adjust:100%}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+  button{touch-action:manipulation}
+</style>
+<title>Тренажёр ГАП 7</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Golos+Text:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one centred column — studio header, question plate, lozenge answers stacked below. */
+:root{
+  --bg:#060B1C; --bg-glow:#122352; --plate:#0C1534; --plate-2:#0A1026;
+  --ink:#EDF2FF; --muted:#93A4CC; --line:rgba(146,170,225,.26);
+  --gold:#F2C14E; --gold-deep:#B88A1C;
+  --sel:#E89A1C; --ok:#2BD68A; --bad:#F0736D;
+  --display:"Unbounded","Segoe UI Semibold","Trebuchet MS",Roboto,Tahoma,sans-serif;
+  --body:"Golos Text","Segoe UI",Roboto,Tahoma,system-ui,sans-serif;
+  --lozenge:polygon(14px 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,14px 100%,0 50%);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;background:
+    radial-gradient(120% 70% at 50% -10%, var(--bg-glow) 0%, rgba(18,35,82,0) 60%),
+    radial-gradient(90% 60% at 50% 110%, #0D1A3F 0%, rgba(13,26,63,0) 65%),
+    var(--bg);
+  color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:20px 48px}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;margin:0}
+
+/* ---- top bar ---- */
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.brand{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;
+  background:linear-gradient(180deg,#FFE9A8,var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+.top .sp{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;
+  padding:5px 12px;font-size:13px;color:var(--muted);background:rgba(10,18,44,.6)}
+.chip b{color:var(--ink);font-variant-numeric:tabular-nums;font-weight:600}
+.linkbtn{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;
+  text-underline-offset:3px;padding:4px}
+.linkbtn:hover{color:var(--gold)}
+
+/* ---- progress ---- */
+.bar{height:4px;border-radius:999px;background:rgba(146,170,225,.16);overflow:hidden;margin-bottom:22px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold-deep),var(--gold));
+  transition:width .35s ease}
+
+/* ---- start screen ---- */
+.hero{text-align:center;padding-block:18px 26px}
+.hero h1{font-size:clamp(26px,6vw,40px);line-height:1.15}
+.hero p{color:var(--muted);max-width:52ch;margin:14px auto 0}
+.modes{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:26px}
+.mode{display:flex;flex-direction:column;gap:6px;align-items:flex-start;text-align:left;cursor:pointer;
+  background:linear-gradient(180deg,var(--plate),var(--plate-2));border:1px solid var(--line);border-radius:14px;
+  padding:16px 18px;color:inherit;font:inherit;transition:border-color .2s,transform .2s}
+.mode:hover{border-color:var(--gold);transform:translateY(-2px)}
+.mode b{font-family:var(--display);font-size:16px;font-weight:600}
+.mode span{color:var(--muted);font-size:13.5px}
+.mode:disabled{opacity:.45;cursor:default;transform:none;border-color:var(--line)}
+.mode.open{border-color:var(--gold)}
+.picker{margin-top:12px;background:linear-gradient(180deg,var(--plate),var(--plate-2));
+  border:1px solid var(--gold);border-radius:14px;padding:16px 18px}
+.picker>b{font-family:var(--display);font-size:15px;font-weight:600;display:block;margin-bottom:4px}
+.picker>.hint{display:block;margin-bottom:14px}
+.pickrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pickrow input[type=number]{width:92px;background:#0A1230;border:1px solid var(--line);border-radius:10px;
+  color:var(--ink);font:inherit;font-size:17px;font-variant-numeric:tabular-nums;text-align:center;
+  padding:12px 8px;-moz-appearance:textfield}
+.pickrow input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.pickrow .of{color:var(--muted);font-size:14px;white-space:nowrap}
+.pickrow .btn{flex:1;min-width:150px}
+input[type=range]{width:100%;margin:16px 0 2px;height:30px;accent-color:var(--gold);background:none}
+input[type=range]:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+.jumps{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.resume{display:block;width:100%;margin-top:22px;padding:16px 24px;font-size:15px}
+.resume small{display:block;font-family:var(--body);font-weight:500;font-size:13px;opacity:.75;margin-top:3px}
+.nostore{margin-top:22px;padding:14px 16px;border-radius:12px;font-size:14px;line-height:1.45;
+  background:rgba(242,193,78,.09);border:1px solid rgba(242,193,78,.4);color:var(--ink)}
+.nostore b{font-family:var(--display);font-weight:600;font-size:13.5px;color:var(--gold);display:block;margin-bottom:4px}
+.stats{margin-top:26px;border-top:1px solid var(--line);padding-top:18px;display:flex;gap:18px;flex-wrap:wrap;
+  align-items:center;color:var(--muted);font-size:14px}
+.stats b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* ---- question plate ---- */
+.plate{background:linear-gradient(180deg,var(--plate),var(--plate-2));border:1px solid var(--line);
+  border-radius:16px;padding:20px;margin-bottom:18px}
+.meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.qnum{font-family:var(--display);font-weight:700;font-size:13px;color:var(--gold);letter-spacing:.08em}
+.tag{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+.qtext{font-size:clamp(16px,2.4vw,19px);line-height:1.45;text-wrap:pretty}
+.sentence{margin-top:14px;padding:14px 16px;border-left:2px solid var(--gold-deep);background:rgba(146,170,225,.07);
+  border-radius:0 10px 10px 0;font-size:15.5px}
+.sentence u{color:var(--gold);text-decoration:none;letter-spacing:.1em}
+
+/* ---- lozenge answers ---- */
+.opts{display:grid;gap:10px}
+.opt{position:relative;display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;
+  border:0;padding:14px 26px;font:inherit;color:var(--ink);background:var(--frame,var(--line));
+  clip-path:var(--lozenge);transition:transform .15s ease}
+.opt::before{content:"";position:absolute;inset:2px;clip-path:var(--lozenge);z-index:0;
+  background:var(--fill,linear-gradient(180deg,#101C40,#0A1230))}
+.opt>*{position:relative;z-index:1}
+.opt:hover:not(:disabled){transform:translateX(3px)}
+.opt:hover:not(:disabled),.opt:focus-visible{--frame:var(--gold)}
+.opt:focus-visible{outline:none;--fill:linear-gradient(180deg,#17254F,#0E1738)}
+.opt:disabled{cursor:default}
+.opt .ltr{font-family:var(--display);font-weight:600;font-size:14px;color:var(--gold);min-width:16px;
+  flex:0 0 auto;text-align:center}
+.opt .lbl{flex:1;min-width:0;font-size:15.3px;line-height:1.4}
+.opt .mark{flex:0 0 auto;font-size:13px;color:var(--muted)}
+.opt.sel{--frame:var(--sel);--fill:linear-gradient(180deg,#7A4F08,#5B3A05);animation:pulse .5s ease-in-out infinite alternate}
+.opt.sel .ltr{color:#FFD98A}
+.opt.ok{--frame:var(--ok);--fill:linear-gradient(180deg,#0E6E4E,#0A5038);animation:none}
+.opt.ok .ltr{color:#9BF3CE}
+.opt.bad{--frame:var(--bad);--fill:linear-gradient(180deg,#7E221D,#5C1814);animation:none}
+.opt.bad .ltr{color:#FFC2BE}
+.opt.miss{--frame:var(--ok);animation:none}
+.opt.miss .ltr{color:#9BF3CE}
+@keyframes pulse{from{filter:brightness(1)}to{filter:brightness(1.35)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- inputs for fill / match / order ---- */
+.fill{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.fill input{flex:1;min-width:200px;background:#0A1230;border:1px solid var(--line);border-radius:10px;
+  color:var(--ink);font:inherit;padding:12px 14px}
+.fill input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.matchrow{display:grid;grid-template-columns:1fr minmax(180px,38%);gap:10px;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--line)}
+.matchrow:last-child{border-bottom:0}
+.matchrow p{margin:0;font-size:14.6px}
+.matchrow select{background:#0A1230;border:1px solid var(--line);border-radius:10px;color:var(--ink);
+  font:inherit;font-size:14px;padding:10px 12px;width:100%}
+.matchrow select:focus{outline:2px solid var(--gold);outline-offset:1px}
+.matchrow.ok select{border-color:var(--ok)}
+.matchrow.bad select{border-color:var(--bad)}
+.matchrow .fix{grid-column:1/-1;font-size:13px;color:var(--ok);margin:0}
+.ord{display:grid;gap:8px}
+.ordit{display:flex;gap:12px;align-items:center;text-align:left;width:100%;cursor:pointer;font:inherit;
+  color:var(--ink);background:linear-gradient(180deg,#101C40,#0A1230);border:1px solid var(--line);
+  border-radius:12px;padding:12px 14px}
+.ordit:hover:not(:disabled){border-color:var(--gold)}
+.ordit:disabled{cursor:default}
+.ordit .pos{flex:0 0 auto;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
+  font-family:var(--display);font-size:13px;font-weight:600;background:rgba(146,170,225,.14);color:var(--muted)}
+.ordit.picked .pos{background:var(--sel);color:#2A1A00}
+.ordit.ok{border-color:var(--ok)} .ordit.ok .pos{background:var(--ok);color:#042B1D}
+.ordit.bad{border-color:var(--bad)} .ordit.bad .pos{background:var(--bad);color:#3A0C09}
+.ordit .was{margin-left:auto;font-size:12.5px;color:var(--muted);flex:0 0 auto}
+
+/* ---- verdict + actions ---- */
+.verdict{margin-top:16px;padding:14px 16px;border-radius:12px;font-size:15px;display:none}
+.verdict.show{display:block}
+.verdict.good{background:rgba(43,214,138,.1);border:1px solid rgba(43,214,138,.4)}
+.verdict.poor{background:rgba(240,115,109,.1);border:1px solid rgba(240,115,109,.4)}
+.verdict b{font-family:var(--display);font-weight:600;display:block;margin-bottom:4px;font-size:14px}
+.verdict.good b{color:var(--ok)} .verdict.poor b{color:var(--bad)}
+.verdict span{color:var(--muted)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;align-items:center}
+.btn{font-family:var(--display);font-weight:600;font-size:14px;cursor:pointer;border-radius:999px;
+  padding:12px 24px;border:1px solid transparent;transition:filter .2s,border-color .2s}
+.btn.primary{background:linear-gradient(180deg,#FFD471,var(--gold-deep));color:#241700}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn.ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn:disabled{opacity:.4;cursor:default;filter:none}
+.hint{color:var(--muted);font-size:13px}
+
+/* ---- result ---- */
+.score{display:flex;gap:26px;flex-wrap:wrap;align-items:baseline;margin:6px 0 18px}
+.score .big{font-family:var(--display);font-weight:700;font-size:clamp(38px,9vw,58px);line-height:1;
+  font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#FFE9A8,var(--gold-deep));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.verdictline{font-size:15.5px}
+.verdictline.pass{color:var(--ok)} .verdictline.fail{color:var(--bad)}
+.misses{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.miss-chip,.jump{border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--muted);
+  font-variant-numeric:tabular-nums;background:none;font-family:inherit;cursor:pointer}
+.miss-chip:hover,.jump:hover{border-color:var(--gold);color:var(--gold)}
+.jump.cont{border-color:var(--gold-deep);color:var(--gold)}
+@media (max-width:560px){
+  :root{--lozenge:polygon(10px 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,10px 100%,0 50%)}
+  .opt{padding:13px 18px;gap:10px}
+  .matchrow{grid-template-columns:1fr}
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <span class="brand">Тренажёр ГАП · 7 уровень</span>
+    <span class="sp"></span>
+    <span class="chip" id="chipMode" hidden></span>
+    <span class="chip" id="chipProg" hidden>Вопрос <b id="pNow">1</b> / <b id="pAll">150</b></span>
+    <span class="chip" id="chipScore" hidden>Верно <b id="pScore">0</b></span>
+    <button class="linkbtn" id="quitBtn" hidden>Выйти</button>
+  </div>
+  <div class="bar" id="barWrap" hidden><i id="bar"></i></div>
+
+  <!-- START -->
+  <section id="scrStart">
+    <div class="hero">
+      <h1>150 вопросов теоретического этапа</h1>
+      <p>Профессиональный экзамен на 7-й уровень квалификации, специалист по организации
+         архитектурно-строительного проектирования. Вариант соискателя — 40 заданий, допуск к практическому
+         этапу с 30 баллов.</p>
+    </div>
+    <button class="btn primary resume" id="resumeBtn" hidden></button>
+    <div class="nostore" id="noStore" hidden>
+      <b>Этот файл не запоминает прогресс</b>
+      Android открывает локальные файлы без постоянного хранилища. Номер текущего задания виден сверху —
+      запишите его, а в режиме «Все подряд» начните с него в следующий раз. Чтобы статистика сохранялась,
+      откройте тренажёр по ссылке и добавьте её на главный экран.
+    </div>
+    <div class="modes">
+      <button class="mode" data-mode="exam"><b>Экзамен</b><span>40 случайных заданий, как на реальном экзамене. Порог — 30 баллов.</span></button>
+      <button class="mode" data-mode="all" id="modeAll" aria-expanded="false" aria-controls="picker"><b>Все подряд</b><span>Все 150 заданий в порядке документа. Можно начать с любого.</span></button>
+      <button class="mode" data-mode="shuffle"><b>Вперемешку</b><span>Все 150 заданий в случайном порядке.</span></button>
+      <button class="mode" data-mode="wrong" id="modeWrong"><b>Работа над ошибками</b><span id="wrongCnt">Пока нет сохранённых ошибок.</span></button>
+    </div>
+    <div class="picker" id="picker" hidden>
+      <b>С какого задания начать?</b>
+      <span class="hint">Дальше пойдут все задания до 150-го.</span>
+      <div class="pickrow">
+        <input type="number" id="fromNum" min="1" max="150" step="1" value="1" inputmode="numeric" aria-label="Номер задания">
+        <span class="of">из 150</span>
+        <button class="btn primary" id="goFrom">Начать с 1-го</button>
+      </div>
+      <input type="range" id="fromRange" min="1" max="150" step="1" value="1" aria-label="Номер задания ползунком">
+      <div class="jumps" id="jumps"></div>
+    </div>
+    <div class="stats">
+      <span>Пройдено: <b id="stSeen">0</b> из 150</span>
+      <span>Верно: <b id="stOk">0</b></span>
+      <span>Ошибок: <b id="stBad">0</b></span>
+      <button class="linkbtn" id="resetBtn">Сбросить статистику</button>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="scrQuiz" hidden>
+    <div class="plate">
+      <div class="meta"><span class="qnum" id="qNum"></span><span class="tag" id="qTag"></span></div>
+      <div class="qtext" id="qText"></div>
+      <div id="qExtra"></div>
+    </div>
+    <div id="qBody"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="actions">
+      <button class="btn primary" id="checkBtn" hidden>Ответить</button>
+      <button class="btn primary" id="nextBtn" hidden>Дальше</button>
+      <span class="hint" id="hint"></span>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="scrResult" hidden>
+    <h1 id="rTitle">Результат</h1>
+    <div class="score">
+      <span class="big" id="rScore">0</span>
+      <span class="verdictline" id="rVerdict"></span>
+    </div>
+    <div id="rMiss"></div>
+    <div class="actions">
+      <button class="btn primary" id="againWrong" hidden>Повторить ошибки</button>
+      <button class="btn ghost" id="homeBtn">В начало</button>
+    </div>
+  </section>
+</div>
+
+<script id="qdata" type="application/json">[{"n":1,"type":"single","q":"Какой документ территориального планирования устанавливает территориальные зоны, градостроительные регламенты, порядок применения такого документа и порядок внесения в него изменений?","options":[{"text":"градостроительный план земельного участка","ok":false},{"text":"правила землепользования и застройки","ok":true},{"text":"проект межевания","ok":false},{"text":"проект планировки территории","ok":false},{"text":"схема территориального планирования","ok":false}],"need":1},{"n":2,"type":"single","q":"Выберите из списка определение термина \"предпроектная подготовка в строительстве\":","options":[{"text":"комплекс работ, проводимых в целях обоснования градостроительной деятельности на территории и получение права на ее проведение","ok":true},{"text":"комплекс взаимосвязанных мероприятий, направленных на подготовку создания объекта (основных фондов), комплекса объектов производственного или непроизводственного назначения, линейных сооружений","ok":false},{"text":"комплекс мероприятий, направленных на привлечение, вложение и управление инвестициями (инвестирование) для целей строительства, реконструкции и капитального ремонта","ok":false},{"text":"комплекс мероприятий, направленных на подготовку ввода в действие объектов производственного и непроизводственного назначения, а также линейных сооружений","ok":false}],"need":1},{"n":3,"type":"fill","q":"Выполните подстановку пропущенных слов (в именительном падеже, первое слово с маленькой буквы):","sentence":"_____ - линии, которые обозначают границы территорий общего пользования и подлежат установлению, изменению или отмене в документации по планировке территории.","answer":"красные линии"},{"n":4,"type":"single","q":"В каком из перечисленных документов содержится информация о возможности подключения (технологического присоединения) объектов капитального строительства к сетям инженерно-технического обеспечения (за исключением сетей электроснабжения), определяемая с учетом программ комплексного развития систем коммунальной инфраструктуры поселения, муниципального округа, городского округа?","options":[{"text":"градостроительный план земельного участка","ok":true},{"text":"проект планировки территории","ok":false},{"text":"правила землепользования и застройки","ok":false},{"text":"проект межевания территории","ok":false},{"text":"разрешение на строительство","ok":false}],"need":1},{"n":5,"type":"single","q":"Для каких объектов капитального строительства при проектировании следует предусматривать научно-техническое сопровождение?","options":[{"text":"для жилых и общественных зданий","ok":false},{"text":"для зданий и сооружений класса КС-3","ok":true},{"text":"для производственных зданий и сооружений","ok":false},{"text":"для опасных производственных зданий и сооружений","ok":false}],"need":1},{"n":6,"type":"multi","q":"Кем из перечисленных участников строительства обеспечивается формирование и ведение информационной модели?","options":[{"text":"застройщиком","ok":true},{"text":"техническим заказчиком","ok":true},{"text":"лицом, обеспечивающим или осуществляющим подготовку обоснования инвестиций","ok":true},{"text":"лицом, ответственным за эксплуатацию объекта капитального строительства","ok":true},{"text":"лицом, осуществляющим подготовку проектной документации","ok":false}],"need":4},{"n":7,"type":"single","q":"Какой нормативный документ устанавливает идентификацию объектов капитального строительства по уровням ответственности?","options":[{"text":"Градостроительный кодекс РФ","ok":false},{"text":"Постановление Правительства Российской Федерации «О составе разделов проектной документации и требованиях к их содержанию»","ok":false},{"text":"Федеральный закон «О техническом регулировании»","ok":false},{"text":"Федеральный закон «Об объектах культурного наследия (памятниках истории и культуры) народов Российской Федерации»","ok":false},{"text":"Федеральный закон «Технический регламент о безопасности зданий и сооружений»","ok":true}],"need":1},{"n":8,"type":"single","q":"Какие из перечисленных объектов капитального строительства НЕ относятся к категории «особо опасные и технически сложные».","options":[{"text":"объекты инфраструктуры внеуличного транспорта","ok":false},{"text":"гидротехнические сооружения первого и второго классов, устанавливаемые в соответствии с законодательством о безопасности гидротехнических сооружений","ok":false},{"text":"объекты высотой более чем 100 метров, для ветроэнергетических установок - более чем 250 метров","ok":true},{"text":"линии электропередачи и иные объекты электросетевого хозяйства напряжением 330 киловольт и более","ok":false},{"text":"объекты космической инфраструктуры","ok":false}],"need":1},{"n":9,"type":"single","q":"В соответствии с каким документом указываются сведения об объекте капитального строительства в задании застройщика или технического заказчика на проектирование и в проектной документации?","options":[{"text":"Классификатор объектов капитального строительства по их назначению и функционально-технологическим особенностям","ok":true},{"text":"Градостроительный кодекс РФ","ok":false},{"text":"Постановление Правительства РФ, устанавливающее состав и содержание проектной документации","ok":false},{"text":"Федеральный закон «О техническом регулировании»","ok":false}],"need":1},{"n":10,"type":"single","q":"К полномочиям какого органа власти относится подготовка и выдача градостроительного плана земельного участка?","options":[{"text":"Министерство строительства и жилищно-коммунального хозяйства Российской Федерации","ok":false},{"text":"орган местного самоуправления по месту нахождения земельного участка","ok":true},{"text":"орган местного самоуправления по месту регистрации правообладателя участка","ok":false},{"text":"Правительство Российской Федерации","ok":false},{"text":"орган исполнительной власти субъекта Российской Федерации","ok":false}],"need":1},{"n":11,"type":"fill","q":"Вставьте пропущенное слово (с большой буквы).","sentence":"_____ деятельность – это деятельность по развитию территорий, в том числе городов и иных поселений, осуществляемая в виде территориального планирования, градостроительного зонирования, планировки территории, архитектурно-строительного проектирования, строительства, капитального ремонта, реконструкции, сноса объектов капитального строительства, эксплуатации зданий, сооружений, благоустройства территорий.","answer":"Градостроительная"},{"n":12,"type":"multi","q":"Какие земли относятся к землям особо охраняемых территорий в соответствии с Земельным кодексом Российской Федерации?","options":[{"text":"особо ценные земли","ok":true},{"text":"земли рекреационного назначения","ok":true},{"text":"земли природоохранного назначения","ok":true},{"text":"земли особо охраняемых природных территорий","ok":true},{"text":"земли лесного фонда","ok":false},{"text":"земли историко-культурного назначения","ok":true},{"text":"земли запаса","ok":false},{"text":"земли для размещения скверов, парков, городских садов","ok":false},{"text":"земли для индивидуальной жилой застройки","ok":false},{"text":"земли водного фонда","ok":false}],"need":5},{"n":13,"type":"single","q":"В каком документе в составе «Правил землепользования и застройки» отображаются территории, в границах которых предусматриваются требования к архитектурно-градостроительному облику объектов капитального строительства?","options":[{"text":"на карте градостроительного зонирования","ok":true},{"text":"на схеме территориального планирования муниципальных районов","ok":false},{"text":"на генеральном плане поселений","ok":false},{"text":"на чертеже планировки территории","ok":false},{"text":"на чертеже межевания территории","ok":false}],"need":1},{"n":14,"type":"single","q":"Какая документация является основанием для разработки рабочей документации?","options":[{"text":"Утвержденная проектная документация","ok":true},{"text":"Градостроительный кодекс Российской Федерации","ok":false},{"text":"Постановление Правительства Российской Федерации","ok":false},{"text":"Градостроительный план земельного участка","ok":false},{"text":"Правила землепользования и застройки","ok":false}],"need":1},{"n":15,"type":"single","q":"Какая документация, на основании которой осуществляется реконструкция объектов капитального строительства, может содержать материалы в форме информационной модели?","options":[{"text":"Проектная документация","ok":false},{"text":"Рабочая документация","ok":true},{"text":"Техническая документация","ok":false},{"text":"Исполнительная документация","ok":false},{"text":"Нормативная документация","ok":false}],"need":1},{"n":16,"type":"multi","q":"Укажите основные способы изображения архитектурного объекта при разработке архитектурного проекта.:","options":[{"text":"Ортогональный чертёж","ok":true},{"text":"Разбивочный чертёж","ok":false},{"text":"Перспективный чертёж","ok":true},{"text":"Аксонометрический чертёж","ok":true},{"text":"Свободный чертёж","ok":false}],"need":3},{"n":17,"type":"single","q":"Укажите, какой вид инженерных изысканий НЕ относится к специальным?","options":[{"text":"геотехнические исследования","ok":false},{"text":"локальные обследования загрязнения грунтов и грунтовых вод","ok":false},{"text":"инженерно-экологические изыскания","ok":true},{"text":"обследования состояния грунтов оснований зданий и сооружений, их строительных конструкций","ok":false},{"text":"поиск и разведка подземных вод для целей водоснабжения","ok":false},{"text":"локальный мониторинг компонентов окружающей среды","ok":false},{"text":"разведка грунтовых строительных материалов","ok":false}],"need":1},{"n":18,"type":"multi","q":"Какую информацию содержит позиция классификатора строительных ресурсов?","options":[{"text":"код строительного ресурса","ok":true},{"text":"наименование строительного ресурса","ok":true},{"text":"единица измерения строительного ресурса","ok":true},{"text":"наименование производитель строительного ресурса","ok":false},{"text":"наименование импортера строительного ресурса","ok":false},{"text":"наименование поставщика строительного ресурса","ok":false}],"need":3},{"n":19,"type":"single","q":"Какой архитектурно-строительный термин обозначает внутренний двор в древнеримском жилище?","options":[{"text":"экседра","ok":false},{"text":"кубикула","ok":false},{"text":"атрий","ok":true},{"text":"триклиний","ok":false},{"text":"кукина","ok":false}],"need":1},{"n":20,"type":"multi","q":"Укажите наименование конструктивного элемента ордерной системы.","options":[{"text":"Брандмауэр","ok":false},{"text":"Импост","ok":false},{"text":"Архитрав","ok":true},{"text":"Нервюра","ok":false},{"text":"Колонна","ok":true}],"need":2},{"n":21,"type":"multi","q":"Укажите наименование архитектурного стиля.","options":[{"text":"Вольный стиль","ok":false},{"text":"Готический стиль","ok":true},{"text":"Эпистолярный стиль","ok":false},{"text":"Классический стиль","ok":true},{"text":"Высокий стиль","ok":false},{"text":"Романский стиль","ok":true}],"need":3},{"n":22,"type":"multi","q":"Укажите наименования основных геометрических характеристик Парфенона.","options":[{"text":"Архитрав","ok":false},{"text":"Энтазис","ok":true},{"text":"Триглиф","ok":false},{"text":"Интерколумний","ok":true},{"text":"Фриз","ok":false},{"text":"Курватура","ok":true}],"need":3},{"n":23,"type":"single","q":"В какой книге Марк Витрувий провозгласил основные цели архитектуры: «Польза, прочность, красота»?","options":[{"text":"Афинская Хартия","ok":false},{"text":"10 книг об архитектуре","ok":true},{"text":"Болонский договор","ok":false},{"text":"4 книги об архитектуре","ok":false},{"text":"Архитектура и искусство Херсонеса","ok":false}],"need":1},{"n":24,"type":"single","q":"Какой из перечисленных композиционных вариантов характеризуется расположением элементов планировочной структуры функциональных зон (жилых, общественно-деловых, производственных зон и др.) в границах красных линий, естественных границах природных объектов и иных границах?","options":[{"text":"Квартальная планировка","ok":true},{"text":"Микрорайонная планировка","ok":false},{"text":"Районная планировка","ok":false},{"text":"Свободная планировка","ok":false}],"need":1},{"n":25,"type":"single","q":"Какой из нижеперечисленных параметров НЕ относится к технико-экономическим показателям проектируемых объектов капитального строительства?","options":[{"text":"площадь застройки","ok":false},{"text":"общая площадь","ok":false},{"text":"строительный объём","ok":false},{"text":"количество этажей","ok":false},{"text":"класс энергетической эффективности","ok":true}],"need":1},{"n":26,"type":"match","q":"В соответствии с Приказом Министерства строительства и жилищно-коммунального хозяйства Российской Федерации установлена типовая форма технического задания на проектирование объекта капитального строительства и требования к его подготовке. Установите соответствие между структурными элементами (из колонки А) и разделами типовой формы задания на проектирование объекта капитального строительства (из колонки Б).","left":["Требования к выполнению демонстрационных материалов, макетов","Требование о применении типовой проектной документации","Предполагаемая (предельная) стоимость строительства объекта","Требования к проекту полосы отвода","Требования к соблюдению безопасных для здоровья человека условий проживания и пребывания в объекте и требования к соблюдению безопасного уровня воздействия объекта на окружающую среду","Принадлежность к опасным производственным объектам"],"right":["общие данные","требования к проектным решениям","иные требования к проектированию"],"map":[2,2,0,1,1,0]},{"n":27,"type":"single","q":"От какого параметра зависит значение суммарной солнечной радиации на горизонтальную поверхность?","options":[{"text":"географическая широта","ok":true},{"text":"географическая долгота","ok":false},{"text":"ориентация по частям света","ok":false},{"text":"рельеф местности","ok":false},{"text":"средняя месячная относительная влажность воздуха","ok":false}],"need":1},{"n":28,"type":"fill","q":"Вставьте два пропущенных слова, первое слово с маленькой буквы.","sentence":"_____- здание, сооружение, комплекс зданий и сооружений, их интерьер, объекты благоустройства, ландшафтного или садово-паркового искусства, созданные на основе архитектурного проекта.","answer":"архитектурный объект"},{"n":29,"type":"fill","q":"Вставьте два пропущенных слова, первое слово с маленькой буквы.","sentence":"_____ - архитектурная часть документации для строительства и градостроительной документации, содержащая архитектурные решения, которые комплексно учитывают социальные, экономические, функциональные, инженерные, технические, противопожарные, санитарно-эпидемиологические, экологические, архитектурно-художественные и иные требования к объекту в объеме, необходимом для разработки документации для строительства объектов, в проектировании которых необходимо участие архитектора","answer":"архитектурный проект"},{"n":30,"type":"multi","q":"Какие из нижеперечисленных зон относятся к зонам охраны объектов культурного наследия?","options":[{"text":"зона регулирования застройки и хозяйственной деятельности","ok":true},{"text":"зона охраняемого природного ландшафта","ok":true},{"text":"охранная зона объекта культурного наследия","ok":true},{"text":"зона охраняемого объекта","ok":false},{"text":"охранная зона памятника природы","ok":false}],"need":3},{"n":31,"type":"single","q":"Для каких автомобильных дорог НЕ устанавливаются придорожные полосы?","options":[{"text":"для автомобильных дорог, расположенных в границах населенных пунктов","ok":true},{"text":"для автомобильных дорог пятой категории","ok":false},{"text":"для автомобильных дорог с одной полосой движения","ok":false},{"text":"для автомобильных дорог без обочины","ok":false},{"text":"для автомобильных дорог шириной полосы движения менее 3м","ok":false}],"need":1},{"n":32,"type":"single","q":"В каком случае при проектировании и строительстве жилого здания должны быть обеспечены условия для жизнедеятельности маломобильных групп населения?","options":[{"text":"в любом случае","ok":false},{"text":"если размещение квартир для семей с инвалидами в данном жилом здании установлено в задании на проектирование","ok":true},{"text":"в случае отсутствия лифтов","ok":false},{"text":"для жилых зданий высотой более 3 этажей","ok":false},{"text":"если размещение квартир для семей с инвалидами в данном жилом здании установлено в региональных и местных нормах градостроительного проектирования","ok":false}],"need":1},{"n":33,"type":"single","q":"Кем согласовывается изменения архитектурного проекта при разработке документации для строительства или при строительстве архитектурного объекта?","options":[{"text":"автором архитектурного проекта","ok":true},{"text":"генподрядчиком","ok":false},{"text":"главным инженером проекта","ok":false},{"text":"заказчиком","ok":false},{"text":"застройщиком","ok":false}],"need":1},{"n":34,"type":"single","q":"Архитектурная деятельность - профессиональная деятельность граждан (архитекторов), имеющая целью….","options":[{"text":"создание архитектурного объекта","ok":true},{"text":"создание архитектурного проекта","ok":false},{"text":"реализация авторского замысла в эскизном архитектурном проекте","ok":false},{"text":"развитие строительной индустрии","ok":false}],"need":1},{"n":35,"type":"single","q":"Какие требования к зданиям и сооружениям, а также к связанным со зданиями и с сооружениями процессам проектирования, строительства, монтажа, наладки, эксплуатации и утилизации устанавливает ФЗ Технический регламент о безопасности зданий и сооружений?","options":[{"text":"минимально необходимые","ok":true},{"text":"максимально необходимые","ok":false},{"text":"рекомендуемые","ok":false},{"text":"специальные","ok":false},{"text":"вариативные","ok":false}],"need":1},{"n":36,"type":"multi","q":"Какие юридически значимые действия НЕ вправе выполнять архитектор или юридическое лицо при осуществлении архитектурной деятельности?","options":[{"text":"выполнять градостроительные нормативы, строительные, а также экологические нормы и правила","ok":false},{"text":"представлять и защищать интересы заказчика по его поручению при заключении договора подряда на строительство архитектурного объекта","ok":false},{"text":"привлекать на договорной основе к разработке документации для строительства необходимых помощников, консультантов и технических работников","ok":false},{"text":"принимать на себя обязательства ответственного представителя заказчика при заключении договора подряда на строительство при наличии личной заинтересованности в прибылях подрядной организации","ok":true},{"text":"принимать на себя по поручению заказчика руководство разработкой всех разделов документации для строительства","ok":false},{"text":"разглашать информацию о намерениях заказчика (застройщика) по реализации архитектурного проекта без его согласия","ok":true},{"text":"участвовать в разработке всех разделов документации для строительства","ok":false}],"need":2},{"n":37,"type":"single","q":"Какая документация НЕ относится к прилагаемым документам, разрабатываемым в дополнение к рабочим чертежам основного комплекта?","options":[{"text":"локальная смета","ok":false},{"text":"опросные листы и габаритные чертежи, выполняемые в соответствии с данными изготовителей (поставщиков) оборудования","ok":false},{"text":"рабочая документация на строительные изделия","ok":false},{"text":"разрешительная документация и проект производства работ","ok":true},{"text":"спецификация оборудования, изделий и материалов","ok":false},{"text":"эскизные чертежи общих видов нетиповых изделий","ok":false}],"need":1},{"n":38,"type":"multi","q":"Для каких видов помещений в разделе проектной документации «Объемно-планировочные и архитектурные решения» объектов капитального строительства производственного и непроизводственного назначения приводится описание и обоснование решений по отделке?","options":[{"text":"основного назначения","ok":true},{"text":"вспомогательного назначения","ok":true},{"text":"обслуживающего назначения","ok":true},{"text":"технического назначения","ok":true},{"text":"специального назначения","ok":false}],"need":4},{"n":39,"type":"fill","q":"Вставьте наименование термина, который соответствует определению (одно слово с маленькой буквы в именительном падеже):","sentence":"_____ - прямое солнечное облучение поверхностей и пространств","answer":"инсоляция"},{"n":40,"type":"multi","q":"Какие условия должны обеспечивать проектные решения зданий и сооружений в целях обеспечения доступности зданий и сооружений для инвалидов и других групп населения с ограниченными возможностями передвижения?","options":[{"text":"достигаемость мест посещения","ok":true},{"text":"беспрепятственность перемещения внутри зданий и сооружений","ok":true},{"text":"безопасность путей движения (эвакуации)","ok":true},{"text":"безопасность мест проживания, мест обслуживания и мест приложения труда","ok":true},{"text":"высокую скорость перемещения внутри зданий и сооружений","ok":false},{"text":"возможность соблюдения социальной дистанции не менее 1.5 м при перемещении внутри зданий и сооружений","ok":false}],"need":4},{"n":41,"type":"multi","q":"Для каких объектов устанавливаются нормируемые параметры шумового режима в части соблюдения требований безопасных для здоровья человека условий проживания и пребывания в зданиях и сооружениях?","options":[{"text":"рабочие места производственных зданий","ok":true},{"text":"санитарно-бытовые помещения производственных зданий","ok":false},{"text":"помещения жилых зданий","ok":true},{"text":"помещения общественных зданий","ok":true},{"text":"территория транспортно-пересадочных узлов","ok":false},{"text":"территория жилой застройки","ok":true}],"need":4},{"n":42,"type":"match","q":"Установите соответствие между определением и соответствующим ему термином:","left":["Количество энергии, излучаемой источником шума в единицу времени.","Способность ограждающей конструкции в здании уменьшать уровень проходящего через нее воздушного шума","Явление постепенного спада звуковой энергии в помещении после прекращения работы источника звука","Передача энергии звука в виде звуковой вибрации по ограждающим конструкциям и инженерным коммуникациям в смежные и удаленные помещения от помещения с источником воздушного, ударного шума и (или) звуковой вибрации"],"right":["Звуковая мощность","Звукоизоляция","Реверберация","Структурная звукопередача","Уровень звука"],"map":[0,1,2,3]},{"n":43,"type":"single","q":"Какой расчётный параметр характеризует суровость климата местности и применяется при расчете теплопотребления инженерными системами здания и выборе требуемого со противления теплопередаче наружных ограждений?","options":[{"text":"средняя суточная амплитуда температуры воздуха наиболее холодного месяца","ok":false},{"text":"градусо-сутки отопительного периода","ok":true},{"text":"средняя скорость ветра за период со средней суточной температурой воздуха 8оС","ok":false},{"text":"продолжительность холодного периода года","ok":false},{"text":"средняя месячная относительная влажность воздуха наиболее холодного месяца","ok":false}],"need":1},{"n":44,"type":"multi","q":"Укажите наименование несущих элементов конструкций зданий:","options":[{"text":"Ферма","ok":true},{"text":"Галерея","ok":false},{"text":"Анфилада","ok":false},{"text":"Ригель","ok":true}],"need":2},{"n":45,"type":"multi","q":"Площади каких помещений не включаются в полезную площадь общественного здания?","options":[{"text":"лестничных клеток","ok":true},{"text":"коридоров","ok":false},{"text":"тамбуров","ok":false},{"text":"лифтовых шахт","ok":true},{"text":"помещений, предназначенных для размещения инженерного оборудования","ok":false}],"need":2},{"n":46,"type":"single","q":"Какой орган власти устанавливает правила выполнения и оформления текстовых и графических материалов, входящих в состав проектной и рабочей документации?","options":[{"text":"Министерство строительства и жилищно-коммунального хозяйства Российской Федерации","ok":true},{"text":"органы местного самоуправления","ok":false},{"text":"органы субъектов Российской Федерации, осуществляющие разработку и реализацию государственной политики в области архитектуры","ok":false},{"text":"Правительство Российской Федерации","ok":false},{"text":"федеральный орган исполнительной власти по архитектуре и градостроительству","ok":false}],"need":1},{"n":47,"type":"single","q":"Какие документы (копии документов, оформленные в установленном порядке) должны быть приложены к разделу 1 проектной документации «Пояснительная записка»?","options":[{"text":"спецификации оборудования и материалов","ok":false},{"text":"документы, содержащие описание организации рельефа вертикальной планировкой","ok":false},{"text":"исходные данные и условия для подготовки проектной документации на объект капитального строительства","ok":true},{"text":"комплексная программа развития муниципального образования, решение органа государственной власти субъекта Российской Федерации или органа местного самоуправления, решение застройщика","ok":false},{"text":"перечень инженерно-технических мероприятий, содержание технологических решений","ok":false}],"need":1},{"n":48,"type":"multi","q":"Ссылками на какие документы должно быть обосновано соответствие проектных значений параметров и других проектных характеристик здания или сооружения требованиям безопасности, а также проектируемые мероприятия по обеспечению его безопасности?","options":[{"text":"ФЗ Технический регламент о безопасности зданий и сооружений","ok":true},{"text":"требования национальных стандартов и сводов правил, в результате применения которых на обязательной и добровольной основе обеспечивается соблюдение требований ФЗ Технический регламент о безопасности зданий и сооружений","ok":true},{"text":"требования специальных технических условий","ok":true},{"text":"ФЗ Градостроительный кодекс Российской Федерации","ok":false},{"text":"Постановление Правительства РФ от 16.02.2008 N 87 \"О составе разделов проектной документации и требованиях к их содержанию\"","ok":false}],"need":3},{"n":49,"type":"single","q":"Какой документ в области стандартизации устанавливает требования к текстовым частям разделов и подразделов проектной документации?","options":[{"text":"ГОСТ Р 21.101 \"Система проектной документации для строительства. Основные требования к проектной и рабочей документации\"","ok":false},{"text":"ГОСТ 21.001 Система проектной документации для строительства. Общие положения","ok":false},{"text":"ГОСТ Р 2.105 Единая система конструкторской документации. Общие требования к текстовым документам","ok":true},{"text":"ГОСТ 2.114 Единая система конструкторской документации. Технические условия","ok":false},{"text":"ГОСТ Р 7.0.97 Система стандартов по информации, библиотечному и издательскому делу. Организационно-распорядительная документация. Требования к оформлению документов","ok":false}],"need":1},{"n":50,"type":"fill","q":"Вставьте пропущенное слово (с большой буквы).","sentence":"Состав и требования к содержанию разделов проектной документации, представляемой на экспертизу и в органы государственного строительного надзора, устанавливаются _____ Российской Федерации.","answer":"Правительством"},{"n":51,"type":"single","q":"Какой из перечисленных документов НЕ подлежит нормоконтролю?","options":[{"text":"спецификация оборудования","ok":false},{"text":"текстовая часть проектной документации","ok":false},{"text":"графическая часть рабочей документации","ok":false},{"text":"текстовая часть рабочей документации","ok":false},{"text":"сметная документация","ok":true}],"need":1},{"n":52,"type":"multi","q":"Кем может повторно утверждаться проектная документация после внесения в нее изменений в процессе строительства, реконструкции, капитального ремонта объекта?","options":[{"text":"владельцем земельного участка","ok":false},{"text":"главным архитектором проекта","ok":false},{"text":"главным инженером проекта","ok":false},{"text":"застройщиком","ok":true},{"text":"представителем генподрядчика","ok":false},{"text":"техническим заказчиком","ok":true}],"need":2},{"n":53,"type":"single","q":"В каких случаях расчеты конструктивных решений включают в состав проектной документации?","options":[{"text":"включают во всех случаях","ok":false},{"text":"не включают, кроме случаев, установленных Правительством РФ","ok":true},{"text":"не включают во всех случаях","ok":false},{"text":"включают в случае, если объект капитального строительства относится к особо опасным и технически сложным или уникальным","ok":false},{"text":"включают только в случае строительства объектов производственного и непроизводственного назначения","ok":false}],"need":1},{"n":54,"type":"multi","q":"В зависимости от каких факторов дифференцируются состав и требования к содержанию разделов проектной документации, представляемой в органы государственного строительного надзора?","options":[{"text":"уровень ответственности объектов капитального строительства","ok":false},{"text":"назначение объектов капитального строительства","ok":true},{"text":"виды работ (строительство, реконструкция, капитальный ремонт объектов капитального строительства)","ok":true},{"text":"источники финансирования работ","ok":true},{"text":"класс функциональной пожарной опасности объектов капитального строительства","ok":false}],"need":3},{"n":55,"type":"single","q":"При каком условии может осуществляться подготовка проектной документации применительно к отдельным этапам строительства, реконструкции объектов капитального строительства?","options":[{"text":"может, при условии указания в задании на проектировании","ok":true},{"text":"может, при условии, что объект капитального строительства относится к категории особо опасных или технически сложных","ok":false},{"text":"может, при условии, что объект капитального строительства относится к категории уникальных","ok":false},{"text":"может, при условии, что объект капитального строительства относится к категории опасных производственных объектов","ok":false},{"text":"не может ни при каком условии","ok":false}],"need":1},{"n":56,"type":"match","q":"Установите соответствие между разделом (подразделом) проектной документации и положениями, содержащимися в текстовых частях таких разделов (подразделов):","left":["Подраздел \"Отопление, вентиляция и кондиционирование воздуха, тепловые сети\"","Раздел \"Мероприятия по охране окружающей среды\"","Раздел \"Конструктивные решения\"","Раздел \"Объёмно-планировочные и архитектурные решения\"","Раздел \"Требования к обеспечению безопасной эксплуатации объектов капитального строительства\"","Раздел \"Технологические решения\""],"right":["Обоснование проектных решений и мероприятий, обеспечивающих снижение шума и вибраций.","Расчет совокупного выделения в воздух внутренней среды помещений химических веществ с учетом совместного использования строительных материалов, применяемых в проектируемом объекте капитального строительства","Перечень мероприятий, направленных на предупреждение вредного воздействия факторов производственной среды и трудового процесса на состояние здоровья работника","Сведения о значениях эксплуатационных нагрузок на строительные конструкции, которые недопустимо превышать в процессе эксплуатации здания, строения или сооружения","Описание мероприятий, обеспечивающих защиту помещений от шума, вибрации и другого воздействия"],"map":[1,null,0,4,3,2]},{"n":57,"type":"multi","q":"Какие главы, по которым распределяются средства, должен содержать сводный сметный расчет стоимости строительства, выполняемый в составе проектной документации на реконструкцию объекта капитального строительства?","options":[{"text":"Объекты транспортного хозяйства и связи (глава 5)","ok":true},{"text":"Благоустройство и озеленение территории (глава 7)","ok":true},{"text":"Временные здания и сооружения (глава 8)","ok":true},{"text":"Содержание службы заказчика. Строительный контроль (глава 10)","ok":true},{"text":"Накладные расходы (Глава 15)","ok":false}],"need":4},{"n":58,"type":"multi","q":"Какие сведения должна содержать проектная документация на объекты капитального строительства и реконструкции в соответствии с требованиями \"Технического регламента о требованиях пожарной безопасности\"?","options":[{"text":"категории наружных установок по пожарной опасности","ok":true},{"text":"категории зданий, сооружений и помещений производственного и складского назначения по пожарной и взрывопожарной опасности","ok":true},{"text":"степень огнестойкости зданий, сооружений и пожарных отсеков, классы их функциональной и конструктивной пожарной опасности","ok":true},{"text":"пожарно-технические характеристики","ok":true},{"text":"класс сооружения","ok":false}],"need":4},{"n":59,"type":"single","q":"В каком случае сметная стоимость строительства подлежит проверке на предмет достоверности ее определения в ходе проведения государственной экспертизы проектной документации?","options":[{"text":"В случае, если сметная стоимость строительства, финансируемого с привлечением средств юридических лиц, созданных муниципальными образованиями, составляет более 30 процентов","ok":false},{"text":"В случае, если сметная стоимость строительства, финансируемого с привлечением средств бюджетов бюджетной системы Российской Федерации, превышает десять миллионов рублей","ok":true},{"text":"В случае, если сметная стоимость строительства превышает сто миллионов рублей","ok":false},{"text":"В случае, если объект капитального строительства относится особо-опасным и технически сложным объектам","ok":false},{"text":"В любом случае","ok":false}],"need":1},{"n":60,"type":"single","q":"В случае несогласия с заключением экспертизы проектной документации или экспертизы результатов инженерных изысканий в течение какого времени со дня утверждения такого заключения застройщик, технический заказчик или их представитель вправе обжаловать его в экспертной комиссии, созданной федеральным органом исполнительной власти, осуществляющим функции по выработке и реализации государственной политики и нормативно-правовому регулированию в сфере строительства, архитектуры, градостроительства?","options":[{"text":"в течение десяти рабочих дней","ok":false},{"text":"в течение одного месяца","ok":false},{"text":"в течение шести месяцев","ok":false},{"text":"в течение одного года","ok":false},{"text":"в течение трех лет","ok":true}],"need":1},{"n":61,"type":"single","q":"Для каких объектов капитального строительства государственная экспертиза проектной документации может проводится в отношении отдельных разделов проектной документации?","options":[{"text":"для объектов с особым статусом, необходимых для обеспечения обороноспособности и безопасности государства, включенных в перечень, утвержденный Правительством Российской Федерации","ok":true},{"text":"для объектов пониженного уровня ответственности","ok":false},{"text":"для объектов нормального уровня ответственности по решению застройщика (технического заказчика)","ok":false},{"text":"для любых объектов, за исключением объектов повышенного уровня ответственности, по согласованию с органами государственной экспертизы","ok":false},{"text":"для многоквартирных жилых домов","ok":false}],"need":1},{"n":62,"type":"single","q":"В каком случае организациями государственной экспертизы допускается предъявление требований о получении в целях реализации проекта по строительству объекта капитального строительства документов, сведений, материалов, согласований, не предусмотренных утверждаемым Правительством РФ исчерпывающим перечнем документов, сведений, материалов и согласований?","options":[{"text":"не допускается в любом случае","ok":true},{"text":"допускается для объектов, финансируемых из средств федерального бюджета","ok":false},{"text":"допускается для объектов капитального строительства повышенного уровня ответственности","ok":false},{"text":"допускается для опасных производственных объектов","ok":false},{"text":"допускается в целях определения соответствия объектов капитального строительства требованиям безопасности","ok":false}],"need":1},{"n":63,"type":"multi","q":"Кем может осуществляться оценка соответствия изменений, внесенных в проектную документацию, получившую положительное заключение экспертизы проектной документации, требованиям технических регламентов, санитарно-эпидемиологическим требованиям, требованиям в области охраны окружающей среды, требованиям государственной охраны объектов культурного наследия, требованиям к безопасному использованию атомной энергии, требованиям промышленной безопасности, требованиям к обеспечению надежности и безопасности электроэнергетических систем и объектов электроэнергетики, требованиям антитеррористической защищенности объекта?","options":[{"text":"застройщиком","ok":false},{"text":"органом исполнительной власти","ok":true},{"text":"органами местного самоуправления","ok":false},{"text":"организацией, проводившей экспертизу проектной документации","ok":true},{"text":"подрядной организацией","ok":false},{"text":"техническим заказчиком","ok":false}],"need":2},{"n":64,"type":"single","q":"Какое из нижеперечисленных обозначений марок рабочих чертежей, используется при объединении рабочих чертежей генерального плана и сооружений транспорта?","options":[{"text":"ГП","ok":false},{"text":"ГТ","ok":true},{"text":"ПТ","ok":false},{"text":"ТП","ok":false}],"need":1},{"n":65,"type":"order","q":"Установите последовательность оформления актов скрытых работ по устройству монолитного железобетонного ленточного фундамента. Ответ запишите в виде последовательности цифр, соответствующем порядку.","items":[{"n":1,"text":"разработка котлованов, траншей, выемок"},{"n":2,"text":"уплотнение грунтов трамбовками и устройство грунтовых подушек"},{"n":3,"text":"обратная засыпка котлованов, траншей и пазух"},{"n":4,"text":"устройство гидроизоляции поверхностей"},{"n":5,"text":"опалубочные работы"},{"n":6,"text":"арматурные работы"},{"n":7,"text":"укладка бетонной смеси"}],"key":[1,2,5,6,7,4,3]},{"n":66,"type":"single","q":"В каких случаях специалисты авторского надзора имеют право приостанавливать своим решением производство строительно-монтажных работ?","options":[{"text":"Имеют право в случае выявленных отступлений от организационно-технологической документации","ok":false},{"text":"При выявлении критических строительных дефектов","ok":true},{"text":"Имеют право в случае выявленных отступлений от проектной или рабочей документации","ok":false},{"text":"Имеют право в случае невыполнения предписаний, занесённых в журнал авторского надзора","ok":false}],"need":1},{"n":67,"type":"single","q":"Какой термин характеризуется как «текстовые и графические материалы, отражающие фактическое исполнение проектных решений и фактическое положение объектов капитального строительства и их элементов в процессе строительства, реконструкции, капитального ремонта объектов капитального строительства по мере завершения определенных в проектной документации работ»?","options":[{"text":"ведомость материалов","ok":false},{"text":"исполнительная документация","ok":true},{"text":"план производства работ","ok":false},{"text":"проектная документация","ok":false},{"text":"рабочая документация","ok":false}],"need":1},{"n":68,"type":"single","q":"Как называется контроль лица, осуществившего подготовку проектной документации, за соблюдением в процессе строительства требований проектной документации согласно ФЗ Технический регламент о безопасности зданий и сооружений?","options":[{"text":"авторский надзор","ok":true},{"text":"технический надзор","ok":false},{"text":"строительный контроль","ok":false},{"text":"государственный строительный надзор","ok":false},{"text":"лабораторный контроль","ok":false}],"need":1},{"n":69,"type":"multi","q":"Для какой категории объектов капитального строительства авторский надзор проводится в обязательном порядке?","options":[{"text":"объекты культурного наследия","ok":true},{"text":"опасные производственные объекты","ok":true},{"text":"многоквартирные жилые дома","ok":false},{"text":"уникальные объекты","ok":false},{"text":"объекты социальной инфраструктуры","ok":false}],"need":2},{"n":70,"type":"single","q":"В какой из перечисленных документов вносятся замечания, выявленные в ходе осуществления авторского надзора за строительством объекта капитального строительства?","options":[{"text":"задание на проведение авторского надзора","ok":false},{"text":"журнал авторского надзора","ok":true},{"text":"план-график авторского надзора","ok":false},{"text":"договор на авторский надзор","ok":false},{"text":"заключение авторского надзора","ok":false}],"need":1},{"n":71,"type":"single","q":"В каком случае лицо, осуществившее подготовку проектной документации, может участвовать в проведении строительного контроля?","options":[{"text":"Может, если оно привлечено для проверки соответствия выполняемых работ проектной документации застройщиком или техническим заказчиком","ok":true},{"text":"Может по указанию органа государственного строительного надзора","ok":false},{"text":"Может, если оно привлечено для проверки соответствия выполняемых работ проектной документации лицом, осуществляющим строительство","ok":false},{"text":"Может по своей инициативе","ok":false},{"text":"Не может в любом случае","ok":false}],"need":1},{"n":72,"type":"single","q":"Какому определению соответствует термин «аварийное состояние»?","options":[{"text":"Категория технического состояния строительной конструкции или здания и сооружения в целом, включая состояние грунтов основания, при которой имеются крены, дефекты и повреждения, приведшие к снижению несущей способности","ok":false},{"text":"Категория технического состояния строительной конструкции или здания и сооружения в целом, включая состояние грунтов основания, характеризующаяся повреждениями и деформациями, свидетельствующими об исчерпании несущей способности и опасности обрушения и (или) характеризующаяся кренами, которые могут вызвать потерю устойчивости объекта","ok":true},{"text":"Категория технического состояния, при которой некоторые из числа оцениваемых контролируемых параметров не отвечают требованиям проекта","ok":false},{"text":"Категория технического состояния, при котором количественные и качественные значения параметров всех критериев оценки технического состояния строительных конструкций зданий и сооружений, включая состояние грунтов основания, не соответствуют установленным в проектной документации","ok":false}],"need":1},{"n":73,"type":"single","q":"В какой документации определяется технологическая последовательность работ при возведении объектов капитального строительства или их отдельных элементов?","options":[{"text":"Рабочая документация","ok":false},{"text":"Проект организации строительства","ok":true},{"text":"Общий и специальные журналы работ","ok":false},{"text":"Исполнительная документация","ok":false}],"need":1},{"n":74,"type":"multi","q":"Какие графические материалы должны содержаться в графической части проекта организации строительства?","options":[{"text":"календарный план строительства","ok":true},{"text":"проект производства работ","ok":false},{"text":"строительный генеральный план основного периода строительства","ok":true},{"text":"график потребности в трудовых ресурсах","ok":false},{"text":"график потребности в строительных материалах, конструкциях, оборудовании","ok":false}],"need":2},{"n":75,"type":"single","q":"Какие конструкции демонтируются в последнюю очередь при сносе и демонтаже производственных каркасных зданий?","options":[{"text":"Конструкции стенового ограждения","ok":false},{"text":"Конструкции покрытия","ok":false},{"text":"Конструкции связевых блоков","ok":true},{"text":"Конструкции подкрановых балок","ok":false}],"need":1},{"n":76,"type":"single","q":"Укажите размер кирпича одинарного.","options":[{"text":"250х85х65","ok":false},{"text":"250х120х65","ok":true},{"text":"250х120х88","ok":false},{"text":"288х138х65","ok":false},{"text":"288х138х88","ok":false}],"need":1},{"n":77,"type":"fill","q":"Выполните подстановку термина, соответствующего определению (с большой буквы в именительном падеже):","sentence":"_____ - пиломатериал толщиной до 100 мм и шириной не более двойной толщины","answer":"Брусок"},{"n":78,"type":"fill","q":"Выполните подстановку термина, соответствующего определению (с большой буквы в именительном падеже):","sentence":"_____ - Прокат поперечного сечения, напоминающего букву \"П\" с закругленными внутренними кромками, с уклоном внутренних граней полок или с параллельными полками.","answer":"Швеллер"},{"n":79,"type":"single","q":"На основе какой документации лицу, осуществляющему строительство, следует подготовить схемы расположения разбиваемых в натуре осей зданий и сооружений, знаков закрепления этих осей и монтажных ориентиров?","options":[{"text":"На основе проекта производства работ","ok":false},{"text":"На основе топографического плана земельного участка","ok":false},{"text":"На основе рабочей документации","ok":true},{"text":"На основе проектной документации","ok":false}],"need":1},{"n":80,"type":"single","q":"Кем устанавливается перечень видов строительных и монтажных работ, ответственных конструкций, участков сетей инженерно-технического обеспечения, подлежащих освидетельствованию с составлением соответствующих актов приемки перед производством последующих работ и устройством последующих конструкций?","options":[{"text":"Застройщиком (техническим заказчиком)","ok":false},{"text":"Лицом, осуществляющим строительство","ok":false},{"text":"Лицом, осуществляющим подготовку проектной документации","ok":true},{"text":"Органами государственного строительного надзора","ok":false}],"need":1},{"n":81,"type":"single","q":"Каким органом власти устанавливается порядок проведения строительного контроля?","options":[{"text":"Министерством строительства и жилищно-коммунального хозяйства Российской Федерации","ok":false},{"text":"органами местного самоуправления","ok":false},{"text":"органами субъектов Российской Федерации, осуществляющие разработку и реализацию государственной политики в области архитектуры","ok":false},{"text":"Правительством Российской Федерации","ok":true},{"text":"федеральным органом исполнительной власти по архитектуре и градостроительству","ok":false}],"need":1},{"n":82,"type":"single","q":"Какое определение соответствует термину «критический дефект» при выполнении строительно-монтажных работ?","options":[{"text":"Дефект, при наличии которого существенно ухудшаются эксплуатационные характеристики строительной продукции","ok":false},{"text":"Дефект, при наличии которого существенно ухудшается долговечность строительной продукции","ok":false},{"text":"Дефект, выявленный при инструментальном контроле, и подлежащий проверке на условия прочности и устойчивости расчётными методами","ok":false},{"text":"Дефект, при наличии которого здание, сооружение, его часть или конструктивный элемент функционально непригодны, дальнейшее ведение работ по условиям прочности и устойчивости небезопасно либо может повлечь снижение указанных характеристик в процессе эксплуатации","ok":true}],"need":1},{"n":83,"type":"single","q":"Укажите минимальную высоту ограждения лестничного марша в многоквартирном жилом доме при зазоре между маршами менее 0,12м:","options":[{"text":"0,75м","ok":false},{"text":"0,90м","ok":true},{"text":"1,05м","ok":false},{"text":"1,20м","ok":false},{"text":"1,35м","ok":false}],"need":1},{"n":84,"type":"single","q":"При какой минимальной высоте многоквартирных жилых зданий следует предусматривать лифт для транспортировки пожарных подразделений?","options":[{"text":"более 12м","ok":false},{"text":"более 28м","ok":false},{"text":"более 50м","ok":true},{"text":"более 75м","ok":false},{"text":"более 100м","ok":false}],"need":1},{"n":85,"type":"single","q":"Укажите минимальную ширину маршей лестниц, ведущих на жилые этажи в многоквартирных секционных трёх- и более этажных жилых зданиях:","options":[{"text":"0,9","ok":false},{"text":"1,0","ok":false},{"text":"1,05","ok":true},{"text":"1,15","ok":false},{"text":"1,35","ok":false}],"need":1},{"n":86,"type":"fill","q":"Вставьте пропущенное слово.","sentence":"В подземном, подвальном, _____, первом и втором этажах многоквартирного жилого здания допускается размещение встроенных и встроенно-пристроенных помещений общественного назначения, в том числе спортивных клубов и залов.","answer":"цокольном"},{"n":87,"type":"multi","q":"Укажите в каких городах возможно размещение встроенных и встроенно-пристроенных помещений общественного назначения выше второго этажа:","options":[{"text":"в крупнейших","ok":true},{"text":"в крупных","ok":true},{"text":"в средних","ok":false},{"text":"в малых","ok":false}],"need":2},{"n":88,"type":"single","q":"Укажите при какой максимальной высоте здания в многоквартирных жилых домах допускается размещать на верхних этажах мастерские для художников и архитекторов?","options":[{"text":"12м","ok":false},{"text":"15м","ok":false},{"text":"28м","ok":true},{"text":"75м","ok":false},{"text":"100м","ok":false}],"need":1},{"n":89,"type":"single","q":"Число подъемов в одном лестничном марше или на перепаде высот должно быть не менее:","options":[{"text":"2","ok":false},{"text":"3","ok":true},{"text":"4","ok":false},{"text":"5","ok":false}],"need":1},{"n":90,"type":"single","q":"Число подъемов в одном лестничном марше или на перепаде высот должно быть не более:","options":[{"text":"13","ok":false},{"text":"15","ok":false},{"text":"17","ok":false},{"text":"18","ok":true},{"text":"19","ok":false}],"need":1},{"n":91,"type":"single","q":"Укажите высоту отметки пола жилого этажа над отметкой пола вестибюля входной группы, начиная с которой в многоквартирных жилых зданиях следует предусматривать лифты:","options":[{"text":"6,0м","ok":false},{"text":"9,0м","ok":false},{"text":"12,0м","ok":true},{"text":"15,0м","ok":false},{"text":"18,0м","ok":false}],"need":1},{"n":92,"type":"single","q":"Укажите минимальную ширину арки в жилом здании для проезда пожарной техники:","options":[{"text":"3,0м","ok":false},{"text":"3,5м","ok":true},{"text":"3,75м","ok":false},{"text":"4,0м","ok":false},{"text":"4,4м","ok":false}],"need":1},{"n":93,"type":"single","q":"Укажите минимальную высоту арки в жилом здании для проезда пожарной техники:","options":[{"text":"3,9м","ok":false},{"text":"4,0м","ok":false},{"text":"4,2м","ok":false},{"text":"4,5м","ok":true},{"text":"4,7м","ok":false}],"need":1},{"n":94,"type":"single","q":"В секции жилого здания при выходе из квартир в коридор (холл, в том числе межквартирный), не имеющий оконного проема площадью не менее 1,2 м в торце, расстояние от двери наиболее удаленной квартиры до лестничной клетки или выхода непосредственно наружу следует принимать не более:","options":[{"text":"9м","ok":false},{"text":"11м","ok":false},{"text":"12м","ok":true},{"text":"13м","ok":false},{"text":"15м","ok":false}],"need":1},{"n":95,"type":"multi","q":"Какие объекты допускается размещать в охранной зоне магистрального газопровода при условии наличия письменного разрешения собственника магистрального газопровода или организации, эксплуатирующей магистральный газопровод?","options":[{"text":"гаражи, стоянки и парковки транспортных средств","ok":true},{"text":"инженерные коммуникации","ok":true},{"text":"объекты индивидуального жилищного строительства","ok":false},{"text":"туристические базы","ok":false}],"need":2},{"n":96,"type":"fill","q":"Вставьте наименование термина, который соответствует определению (два слова с маленькой буквы в именительном падеже):","sentence":"_____ - зона с особыми условиями использования территорий, установленная в целях обеспечения безопасности полетов воздушных судов, перспективного развития аэропорта и исключения негативного воздействия оборудования аэродрома и полетов воздушных судов на здоровье человека и окружающую среду.","answer":"приаэродромная территория"},{"n":97,"type":"single","q":"Какая зона с особыми условиями использования территорий устанавливается в целях обеспечения санитарно-эпидемиологических требований к водным объектам?","options":[{"text":"зона санитарной охраны источников питьевого и хозяйственно-бытового водоснабжения","ok":true},{"text":"охранная зона гидроэнергетического объекта","ok":false},{"text":"рыбохозяйственная заповедная зона","ok":false},{"text":"санитарно-защитная зона","ok":false},{"text":"зона наблюдения","ok":false}],"need":1},{"n":98,"type":"single","q":"Каким органом исполнительной власти принимается решение об образовании рыбохозяйственной заповедной зоны, а также устанавливаются виды хозяйственной и иной деятельности, которые запрещены или ограничены в такой рыбохозяйственной заповедной зоне?","options":[{"text":"Министерством сельского хозяйства РФ","ok":true},{"text":"Министерством строительства и жилищно-коммунального хозяйства РФ","ok":false},{"text":"Федеральной службой по надзору в сфере защиты прав потребителей и благополучия человека","ok":false},{"text":"Федеральной службой по надзору в сфере природопользования","ok":false},{"text":"Правительством РФ","ok":false}],"need":1},{"n":99,"type":"single","q":"Кому функционально должны подчиняться нормоконтролеры проектной и рабочей документации в организации, если они работают в составе разных подразделений?","options":[{"text":"руководителю подразделения, в котором работает специалист, осуществляющий нормоконтроль","ok":false},{"text":"ответственному за процесс проведения нормоконтроля в организации должностному лицу","ok":true},{"text":"главному инженеру проекта","ok":false},{"text":"руководителю организации","ok":false},{"text":"главному архитектору проекта","ok":false}],"need":1},{"n":100,"type":"single","q":"Каким нормативным актом определен порядок заключения договора подряда на выполнение проектных и изыскательских работ?","options":[{"text":"Градостроительным кодексом Российской Федерации","ok":false},{"text":"Гражданским кодексом Российской Федерации","ok":true},{"text":"Земельным кодексом Российской Федерации","ok":false},{"text":"Жилищным кодексом Российской Федерации","ok":false},{"text":"Трудовым кодексом Российской Федерации","ok":false}],"need":1},{"n":101,"type":"single","q":"По договору подряда на выполнение проектных работ проектировщик обязуется….","options":[{"text":"по заданию заказчика разработать проектную и рабочую документацию","ok":false},{"text":"по заданию заказчика разработать техническую документацию","ok":true},{"text":"по заданию заказчика разработать проектную документацию и согласовать её вместе с заказчиком с компетентными государственными органами и органами местного самоуправления","ok":false},{"text":"по заданию заказчика разработать рабочую документацию","ok":false},{"text":"по заданию заказчика разработать задание на проектирование, проектную и рабочую документацию","ok":false}],"need":1},{"n":102,"type":"single","q":"Какое из нижеперечисленных действий НЕ является обязанностью подрядчика по договору подряда на выполнение проектных и изыскательских работ?","options":[{"text":"выполнение работ в соответствии с заданием и иными исходными данными на проектирование и договором","ok":false},{"text":"согласование готовой технической документации с заказчиком","ok":false},{"text":"согласование готовой технической документации при необходимости вместе с заказчиком - с компетентными государственными органами и органами местного самоуправления","ok":false},{"text":"передача заказчику готовой технической документации","ok":false},{"text":"определение способов выполнения работ","ok":true}],"need":1},{"n":103,"type":"single","q":"Укажите параметр, от значения которого устанавливается срок архитектурно-строительного архитектурно-строительного проектирования в случае предоставления земельного участка в аренду на аукционе на право заключения договора аренды земельного участка, находящегося в государственной или муниципальной собственности.","options":[{"text":"сметная стоимость объекта капитального строительства","ok":false},{"text":"площадь застройки объекта капитального строительства","ok":false},{"text":"плотность застройки земельного участка","ok":false},{"text":"площадь объекта капитального строительства","ok":true}],"need":1},{"n":104,"type":"single","q":"К полномочиям какого органа исполнительной власти относится установление срока, необходимого для осуществления архитектурно-строительного проектирования в целях расчета срока договора аренды земельного участка, находящегося в государственной или муниципальной собственности?","options":[{"text":"Правительство Российской Федерации","ok":false},{"text":"Министерство промышленности и торговли Российской Федерации","ok":false},{"text":"Министерство строительства и жилищно-коммунального хозяйства Российской Федерации","ok":true},{"text":"Министерство экономического развития Российской Федерации","ok":false},{"text":"Федеральная служба по экологическому, технологическому и атомному надзору","ok":false}],"need":1},{"n":105,"type":"multi","q":"Какие работы учтены Справочниками базовых цен на проектные работы?","options":[{"text":"изготовление демонстрационных материалов (кроме макетов)","ok":true},{"text":"защита проектной документации в экспертных и утверждающих инстанциях","ok":true},{"text":"разработка деталировочных чертежей металлических конструкций","ok":false},{"text":"разработка рабочей документации на строительство временных зданий и сооружений","ok":false},{"text":"выполнение работ по оценке воздействия объекта капитального строительства на окружающую среду","ok":false}],"need":2},{"n":106,"type":"single","q":"Стоимость каких работ НЕ учитывает базовая цена разработки проектной и рабочей документации объекта капитального строительства, определённая по справочникам базовых цен на проектные работы в строительстве?","options":[{"text":"стоимость проектирования инженерных сетей и коммуникаций вне площадки строительства","ok":true},{"text":"стоимость проектирования площадочных инженерных сетей","ok":false},{"text":"стоимость проектирования площадочных инженерных сооружений","ok":false},{"text":"стоимость проектирования вспомогательных объектов","ok":false},{"text":"стоимость проектирования основных объектов","ok":false}],"need":1},{"n":107,"type":"single","q":"Какие из нижеперечисленных признаков не относятся к реконструкции объекта капитального строительства (за исключением линейных объектов)?","options":[{"text":"Изменение высоты","ok":false},{"text":"Изменение технико-экономических показателей основных средств или их отдельных частей","ok":true},{"text":"Изменение количества этажей","ok":false},{"text":"Изменение площади","ok":false},{"text":"Изменение объёма","ok":false}],"need":1},{"n":108,"type":"single","q":"Для каких сооружений при проектировании необходимо использовать данные экспериментальных исследований на моделях или натурных конструкциях?","options":[{"text":"для сооружений повышенного уровня ответственности, при проектировании которых использованы не апробированные ранее конструктивные решения","ok":false},{"text":"для сооружений класса КС-3, при проектировании которых использованы не апробированные ранее конструктивные решения","ok":true},{"text":"для особо опасных, технически сложных объектов, при проектировании которых использованы не апробированные ранее конструктивные решения","ok":false},{"text":"для уникальных объектов, при проектировании которых использованы не апробированные ранее конструктивные решения","ok":false},{"text":"для опасных производственных объектов, при проектировании которых использованы не апробированные ранее конструктивные решения","ok":false}],"need":1},{"n":109,"type":"multi","q":"На каких принципах основывается стандартизация в Российской Федерации?","options":[{"text":"добровольность применения документов по стандартизации","ok":true},{"text":"установление в документах по стандартизации требований, обеспечивающих возможность контроля за их выполнением","ok":true},{"text":"соответствие документов по стандартизации действующим на территории Российской Федерации техническим регламентам","ok":true},{"text":"обязательность применения документов по стандартизации","ok":false},{"text":"соответствие уровню развития национальной экономики, развития материально-технической базы, а также уровню научно-технического развития","ok":false}],"need":3},{"n":110,"type":"single","q":"Какой вид документов НЕ относится к документам по стандартизации?","options":[{"text":"технические спецификации (отчеты)","ok":false},{"text":"технические регламенты","ok":true},{"text":"стандарты организаций","ok":false},{"text":"технические условия","ok":false}],"need":1},{"n":111,"type":"single","q":"Каким образом определяется стоимость разработки проектной и рабочей документации в случае, если цены в справочниках базовых цен на проектные работы в строительстве не приведены и не могут быть приняты по аналогии?","options":[{"text":"в соответствии с калькуляцией затрат","ok":true},{"text":"в соответствии со среднерыночной стоимостью аналогичных работ по разработке проектной документации на текущую дату","ok":false},{"text":"в соответствии с нормативной продолжительностью работ по разработке проектной документации","ok":false},{"text":"в соответствии с рекомендациями ФАУ «Главгосэкспертиза России»","ok":false},{"text":"в соответствии с рекомендациями организации, в которой планируется проведение экспертизы проектной документации","ok":false}],"need":1},{"n":112,"type":"single","q":"На какую дату исчисляется стоимость строительства при определении базовой цены разработки проектной и рабочей документации от общей стоимости строительства?","options":[{"text":"01.01.2000 г","ok":false},{"text":"31.12.2020 г","ok":false},{"text":"01.01.2001г","ok":true},{"text":"01.01.2020 г","ok":false},{"text":"01.01.2021 г","ok":false}],"need":1},{"n":113,"type":"single","q":"Какое из нижеперечисленных лиц обеспечивает выполнение работ по договорам о подготовке проектной документации?","options":[{"text":"Застройщик, технический заказчик, лицо, ответственное за эксплуатацию здания, сооружения, региональный оператор","ok":false},{"text":"Главный инженер проекта, главный архитектор проекта","ok":true},{"text":"Лицо, осуществляющее подготовку проектной документации","ok":false},{"text":"Саморегулируемая организация, основанная на членстве лиц, осуществляющих подготовку проектной документации","ok":false},{"text":"Местные органы исполнительной власти","ok":false}],"need":1},{"n":114,"type":"single","q":"В каком из перечисленных требований к зданиям и сооружениям указывается такой показатель как качество воды, используемой в качестве питьевой и для хозяйственно-бытовых нужд согласно ФЗ Технический регламент о безопасности зданий и сооружений?","options":[{"text":"требования к обеспечению механической безопасности","ok":false},{"text":"требования к обеспечению пожарной безопасности","ok":false},{"text":"требования безопасных для здоровья человека условий проживания и пребывания в зданиях и сооружениях","ok":true},{"text":"требования энергетической эффективности зданий и сооружений","ok":false},{"text":"требования безопасного уровня воздействия зданий и сооружений на окружающую среду","ok":false}],"need":1},{"n":115,"type":"multi","q":"Какие выводы должны содержаться в заключении, утверждаемом по итогам установления причин нарушения законодательства о градостроительной деятельности, приведшего к причинению вреда жизни или здоровью физических лиц, имуществу физических или юридических лиц?","options":[{"text":"о необходимых мерах по восстановлению благоприятных условий жизнедеятельности человека","ok":true},{"text":"о причинах нарушения законодательства, в результате которого был причинен вред жизни или здоровью физических лиц, имуществу физических или юридических лиц и его размерах","ok":true},{"text":"о выплате потерпевшим компенсации сверх возмещения вреда","ok":false},{"text":"об обстоятельствах, указывающих на виновность лиц","ok":false},{"text":"об установлении размера компенсации, подлежащей выплате потерпевшим","ok":false}],"need":2},{"n":116,"type":"single","q":"Укажите наименование выступающей части здания, идущей на всю его высоту.","options":[{"text":"Архитрав","ok":false},{"text":"Ризалит","ok":true},{"text":"Нервюра","ok":false},{"text":"Полица","ok":false},{"text":"Моноптер","ok":false}],"need":1},{"n":117,"type":"single","q":"Укажите наименование утолщения ствола колонны на одной трети высоты снизу, примерно на уровне роста человека.","options":[{"text":"Панель","ok":false},{"text":"Ризалит","ok":false},{"text":"Энтазис","ok":true},{"text":"Аркбутан","ok":false},{"text":"Аппарель","ok":false}],"need":1},{"n":118,"type":"single","q":"Какое значение имеет число, выражающее \"золотое сечение\"?","options":[{"text":"1,118","ok":false},{"text":"1,414","ok":false},{"text":"1,618","ok":true},{"text":"3,141","ok":false},{"text":"3,620","ok":false}],"need":1},{"n":119,"type":"multi","q":"Укажите наименование античных греческих классических ордеров.","options":[{"text":"Дорический","ok":true},{"text":"Тосканский","ok":false},{"text":"Ионический","ok":true},{"text":"Композитный","ok":false},{"text":"Коринфский","ok":true}],"need":3},{"n":120,"type":"single","q":"Укажите наименование ряда последовательно примыкающих друг к другу помещений:","options":[{"text":"Аркада","ok":false},{"text":"Анфилада","ok":true},{"text":"Эспланада","ok":false},{"text":"Эстакада","ok":false}],"need":1},{"n":121,"type":"single","q":"Укажите субъекта градостроительной деятельности, разрешение которого является необходимым для строительства любого объекта.","options":[{"text":"собственник земельного участка и (или) здания, сооружения","ok":true},{"text":"заказчик проекта","ok":false},{"text":"инвестор проекта","ok":false},{"text":"генподрядчик проекта","ok":false},{"text":"главный инженер проекта","ok":false},{"text":"главный архитектор проекта","ok":false}],"need":1},{"n":122,"type":"multi","q":"Кому из перечисленных лиц предоставлено право безвозмездно использовать типовую проектную документацию при осуществлении архитектурно-строительного проектирования аналогичного объекта, исключительное право на которую принадлежит Российской Федерации, субъекту Российской Федерации или муниципальному образованию?","options":[{"text":"органы исполнительной власти субъекта Российской Федерации","ok":true},{"text":"органы местного самоуправления","ok":true},{"text":"юридические лица, созданные Российской Федерацией, субъектом Российской Федерации, муниципальным образованием","ok":true},{"text":"индивидуальные предприниматели и юридические лица, являющиеся членами саморегулируемых организаций в области архитектурно-строительного проектирования","ok":false},{"text":"профессиональные образовательные организации и образовательные организации высшего образования","ok":false}],"need":3},{"n":123,"type":"multi","q":"Выберите критерии, в соответствии с которыми проектная документация по решению уполномоченного Правительством Российской Федерации федерального органа исполнительной власти может быть признана типовой проектной документацией:","options":[{"text":"получившая положительное заключение государственной экспертизы проектной документации","ok":true},{"text":"использованная при строительстве, реконструкции объекта капитального строительства, в отношении которого получено разрешение о его вводе в эксплуатацию","ok":true},{"text":"имеющая в составе информационную модель","ok":false},{"text":"содержит типовые объемно-планировочные решения для аналогичных объектов","ok":false},{"text":"содержит типовые конструктивные решения для аналогичных объектов","ok":false}],"need":2},{"n":124,"type":"single","q":"Какое действие необходимо совершить автору архитектурного проекта при выявлении отступления от проекта при его реализации?","options":[{"text":"известить об этом орган, выдавший разрешение на строительство, для принятия необходимых мер по предотвращению возможного ущерба","ok":true},{"text":"известить строительную организацию, допустившую отступления от проекта","ok":false},{"text":"известить об этом главного инженера проекта, для принятия необходимых мер по предотвращению возможного ущерба","ok":false},{"text":"обратиться в организацию по защите авторских прав","ok":false}],"need":1},{"n":125,"type":"multi","q":"Какие сведения должны быть приведены в техническом задании на разработку специальных технических условий?","options":[{"text":"обоснование необходимости разработки СТУ, включая указание риска причинения вреда (ущерба) охраняемым законом ценностям","ok":true},{"text":"данные об уровне ответственности объекта капитального строительства в соответствии с требованиями национальных стандартов, сводов правил","ok":true},{"text":"требований в области безопасности, необходимых для разработки СТУ","ok":true},{"text":"описание объекта капитального строительства в целом, его идентифицирующих признаков и его важнейших элементов с изложением объемно-планировочных и конструктивных решений","ok":false},{"text":"сведения о заинтересованных лицах и разработчике (наименование, идентификационный номер налогоплательщика)","ok":false}],"need":3},{"n":126,"type":"single","q":"Каким образом осуществляется подготовка проектной документации и строительство здания или сооружения в случае, если для подготовки проектной документации требуется отступление от требований национальных стандартов и сводов правил, недостаточно требований к надежности и безопасности, установленных указанными стандартами и сводами правил, или такие требования не установлены?","options":[{"text":"в соответствии со специальными техническими условиями","ok":true},{"text":"в соответствии с техническими условиями","ok":false},{"text":"в соответствии с требованиями международных стандартов и технических регламентов","ok":false},{"text":"пересматриваются характеристики объекта капитального строительства с целью обеспечения возможности проектирования и строительства в соответствии с требованиями действующих национальных стандартов и сводов правил","ok":false},{"text":"подготовка проектной документации и строительство здания или сооружения в таком случае невозможна","ok":false}],"need":1},{"n":127,"type":"single","q":"За исключением каких случаев возможно проведение оценки соответствия изменений, внесенных в проектную документацию, получившую положительное заключение экспертизы проектной документации, требованиям технических регламентов и др. нормативно-правовых актов в форме экспертного сопровождения органом исполнительной власти или организацией, проводившими экспертизу проектной документации?","options":[{"text":"Невозможно в любых случаях без исключений, в связи с тем, что проектная документация должна быть повторно отправлена на экспертизу","ok":false},{"text":"Возможно, за исключением случаев, когда проектная документация разрабатывается для объектов, сметная стоимость строительства, реконструкции, капитального ремонта которых в соответствии с требованиями Градостроительного кодекса РФ подлежит проверке на предмет достоверности ее определения","ok":false},{"text":"Возможно, за исключением случаев, когда проектная документация разрабатывается для объектов, строительство, реконструкцию, капитальный ремонт которых планируется осуществлять в границах охранных зон трубопроводов","ok":false},{"text":"Возможно, за исключением случаев, когда проектная документация разрабатывается для объектов, относящихся к категории особо опасных, технически сложных или уникальных","ok":false},{"text":"Возможно, во всех случаях без исключений","ok":true}],"need":1},{"n":128,"type":"single","q":"На каком основании осуществляется создание, реализация и иное использование архитектурного проекта?","options":[{"text":"на основании оформления технического задания","ok":false},{"text":"на основании поступлении заявки от заказчика (застройщика)","ok":false},{"text":"на основании приказа главного архитектора проекта","ok":false},{"text":"на основании заключения договора","ok":true}],"need":1},{"n":129,"type":"multi","q":"При каких условиях иностранные граждане и лица без гражданства могут принимать участие в архитектурной деятельности на территории Российской Федерации при отсутствии соответствующего международного договора с Российской Федерацией?","options":[{"text":"при наличии международного сертификата на ведение самостоятельной профессиональной деятельности","ok":false},{"text":"при наличии подтвержденной международной квалификации «Архитектор»","ok":false},{"text":"при наличии разрешения на работу на территории Российской Федерации","ok":false},{"text":"работая над проектом удаленно (онлайн)","ok":false},{"text":"работая совместно с архитектором - гражданином Российской Федерации","ok":true},{"text":"работая совместно с юридическим лицом, зарегистрированным на территории Российской Федерации","ok":true}],"need":2},{"n":130,"type":"single","q":"В каком случае заказчик (застройщик) или подрядчик вправе НЕ привлекать автора архитектурного проекта с его согласия к разработке документации для строительства архитектурного объекта?","options":[{"text":"при условии реализации архитектурного проекта объекта индивидуального жилищного строительства","ok":false},{"text":"в случае если автор проекта не имеет статуса главного архитектора проекта","ok":false},{"text":"при условии реализации архитектурного проекта без изменений","ok":true},{"text":"в случае если автор проекта в установленный срок не инициировал свое участие","ok":false},{"text":"при условии реализации архитектурного проекта повторно","ok":false}],"need":1},{"n":131,"type":"single","q":"Кому из нижеперечисленных лиц Градостроительным кодексом предоставлено право выполнять оценку соответствия изменений, внесенных в проектную документацию, получившую положительное заключение экспертизы проектной документации, в форме экспертного сопровождения?","options":[{"text":"Органу исполнительной власти","ok":true},{"text":"Застройщику или техническому заказчику","ok":false},{"text":"Проектной организации, осуществляющая авторский надзор","ok":false},{"text":"Лицу, осуществлявшему подготовку проектной документации","ok":false},{"text":"Органу государственного строительного контроля","ok":false}],"need":1},{"n":132,"type":"single","q":"В какой срок может осуществляться оперативное внесение изменений в проектную документацию при проведении государственной экспертизы проектной документации?","options":[{"text":"в срок, который установлен приказом органа государственной экспертизы, не позднее чем за 5 рабочих дней до окончания срока проведения государственной экспертизы","ok":false},{"text":"в срок, установленный лицом, осуществляющим подготовку проектной документации, не позднее чем за 5 рабочих дней до окончания срока проведения государственной экспертизы","ok":false},{"text":"в срок, который установлен административным регламентом, утверждённым органом государственной экспертизы, не позднее чем за 10 рабочих дней до окончания срока проведения государственной экспертизы","ok":false},{"text":"в срок, который установлен договором, но не позднее чем за 10 рабочих дней до окончания срока проведения государственной экспертизы","ok":true},{"text":"в срок, установленный заявителем, не позднее чем за 10 рабочих дней до окончания срока проведения государственной экспертизы","ok":false}],"need":1},{"n":133,"type":"single","q":"Изменение документа (в том числе его аннулирование) выполняют на основании разрешения на внесение изменений, утверждённого….","options":[{"text":"главным архитектором или главным инженером проекта","ok":false},{"text":"руководителем организации - разработчиком документа или другим уполномоченным им должностным лицом","ok":true},{"text":"застройщиком, техническим заказчиком, лицом, ответственным за эксплуатацию здания, сооружения, региональным оператором","ok":false},{"text":"лицом, ответственным за осуществление авторского надзора","ok":false},{"text":"руководителем структурного подразделения проектной организации","ok":false}],"need":1},{"n":134,"type":"single","q":"В какой срок все изменения в проектной документации построенного объекта капитального строительства должны быть оформлены в установленном порядке?","options":[{"text":"после выполнения в полном объеме всех работ, предусмотренных проектной документацией","ok":false},{"text":"до направления в адрес застройщика (технического заказчика) лицом, осуществляющего строительство, письменного извещения о готовности объекта к приемке","ok":false},{"text":"до момента предъявления законченного строительством объекта к приемке","ok":true},{"text":"до подписания участниками строительства акта приемки объекта капитального строительства","ok":false},{"text":"до получения от органов государственного строительного надзора заключения о соответствии построенного объекта капитального строительства требованиям технических регламентов (норм и правил), иных нормативных правовых актов и проектной документации","ok":false}],"need":1},{"n":135,"type":"order","q":"Установите последовательность стадий жизненного цикла проекта.","items":[{"n":1,"text":"Проектирование и разработка"},{"n":2,"text":"Концепция и определение"},{"n":3,"text":"Инсталляция и ввод, выпуск, внедрение и введение в действие проекта"},{"n":4,"text":"Предварительное технико-экономическое обоснование"},{"n":5,"text":"Эксплуатация и техническое обслуживание"},{"n":6,"text":"Завершение и распоряжение"}],"key":[2,4,1,3,5,6]},{"n":136,"type":"single","q":"Какие требования к квалификации предъявляются к кандидатам на должность \"Архитектор\"?","options":[{"text":"высшее профессиональное образование и стаж работы на архитектурных должностях, замещаемых специалистами с высшим профессиональным образованием, не менее 2 лет","ok":false},{"text":"высшее профессиональное образование и опыт работы в проектных организациях","ok":false},{"text":"высшее профессиональное образование без предъявления требований к стажу работы или среднее профессиональное образование и стаж работы по специальности не менее 2 лет","ok":true},{"text":"среднее профессиональное образование и стаж работы в должности техника-проектировщика I категории не менее 2 лет","ok":false},{"text":"среднее профессиональное образование без предъявления требований к стажу работы или практический опыт работы в проектных организациях не менее 5 лет","ok":false}],"need":1},{"n":137,"type":"order","q":"Установите последовательность действий, в которых может потребоваться участие специалиста по организации архитектурно-строительного проектирования. Ответ запишите в виде последовательности цифр, соответствующей порядку.","items":[{"n":1,"text":"подготовка задания на проектирование"},{"n":2,"text":"выполнение инженерных изысканий"},{"n":3,"text":"подготовка проектной документации"},{"n":4,"text":"разработка рабочей документации"},{"n":5,"text":"строительный контроль"}],"key":[1,2,3,4,5]},{"n":138,"type":"single","q":"Какое определение соответствует термину \"менеджмент качества\"?","options":[{"text":"действия по улучшению результатов деятельности","ok":false},{"text":"скоординированная деятельность по руководству и управлению организацией применительно к качеству","ok":true},{"text":"сочетание внутренних и внешних факторов, которое может оказывать влияние на подход организации к постановке и достижению ее целей","ok":false},{"text":"планирование, организация, мониторинг, управление и предоставление отчетности по всем аспектам проекта","ok":false},{"text":"совокупность взаимосвязанных и (или) взаимодействующих видов деятельности, использующих входы для получения намеченного результата","ok":false}],"need":1},{"n":139,"type":"single","q":"Заверение лица, подготовившего проектную документацию, о том, что проектная документация разработана в соответствии с заданием на проектирование и требованиями Федерального закона \"Технический регламент о безопасности зданий и сооружений\" представляет собой….","options":[{"text":"форму обязательной оценки соответствия","ok":true},{"text":"юридически значимое действие, предусматривающее административную и (или) уголовную ответственность лица, организующего подготовку проектной документации, в случае несоответствия такого заверения указанным требованиям","ok":false},{"text":"декларацию соответствия","ok":false},{"text":"традиционную формальность","ok":false},{"text":"форму стандарта проектной организации","ok":false}],"need":1},{"n":140,"type":"single","q":"Какой нормативно-правовой акт определяет обязанность работодателя обеспечивать безопасность и условия труда, соответствующие государственным нормативным требованиям охраны труда?","options":[{"text":"Технический регламент о безопасности зданий и сооружений","ok":false},{"text":"Трудовой Кодекс РФ","ok":true},{"text":"Федеральный закон \"Об основах охраны здоровья граждан в Российской Федерации\"","ok":false},{"text":"Федеральный закон \"О санитарно-эпидемиологическом благополучии населения\"","ok":false}],"need":1},{"n":141,"type":"single","q":"Согласно Трудовому Кодексу РФ нормальная продолжительность рабочего времени не может превышать 40 часов в неделю. Для какой категории работников устанавливается сокращённая продолжительность рабочего времени?","options":[{"text":"для работников, являющихся инвалидами III группы","ok":false},{"text":"для работников в возрасте от восемнадцати до двадцати лет","ok":false},{"text":"для работников, условия труда на рабочих местах которых отнесены к вредным условиям труда 3 степени","ok":true},{"text":"для машинистов строительных машин и механизмов при производстве взрывных работ","ok":false}],"need":1},{"n":142,"type":"single","q":"В течение рабочего дня (смены) работнику должен быть предоставлен перерыв для отдыха и питания. Какая минимальная продолжительность предоставляемого работнику перерыва?","options":[{"text":"15 минут","ok":false},{"text":"30 минут","ok":true},{"text":"45 минут","ok":false},{"text":"60 минут","ok":false}],"need":1},{"n":143,"type":"single","q":"Какие несчастные случаи на производстве обязательно оформляются актом по форме Н-1?","options":[{"text":"Все случаи, даже не вызвавшие потери трудоспособности","ok":false},{"text":"Случаи с потерей трудоспособности не менее чем на 1 день","ok":true},{"text":"Все случаи, по которым рабочий обратился в медпункт","ok":false},{"text":"Все случаи с потерей трудоспособности","ok":false}],"need":1},{"n":144,"type":"multi","q":"Какие действия относятся к функциональным областям управления проектом:","options":[{"text":"управление экологией проекта","ok":false},{"text":"управление семантикой проекта","ok":false},{"text":"управление заинтересованными сторонами проекта","ok":true},{"text":"управление интеграцией проекта","ok":true}],"need":2},{"n":145,"type":"multi","q":"Какие функции относятся к должностным обязанностям специалистов по организации архитектурно-строительного проектирования (ГИП, ГАП) в соответствии с Градостроительным кодексом?","options":[{"text":"оперативное планирование, координация и организация сноса объекта капитального строительства","ok":false},{"text":"оперативное планирование, координация, организация и проведение строительного контроля в процессе строительства, реконструкции, капитального ремонта объекта капитального строительства","ok":false},{"text":"определение критериев отбора участников работ по подготовке проектной документации и отбору исполнителей таких работ, а также по координации деятельности исполнителей таких работ","ok":false},{"text":"организация входного контроля проектной документации объекта капитального строительства, проекта организации работ по сносу объекта капитального строительства","ok":false},{"text":"утверждение заданий на проектирование объекта капитального строительства","ok":true},{"text":"представление, согласование и приемка результатов работ по подготовке проектной документации","ok":true},{"text":"приемка законченных видов и отдельных этапов работ по строительству, реконструкции, капитальному ремонту, сносу объектов капитального строительства","ok":false}],"need":2},{"n":146,"type":"single","q":"Какие обязанности специалистов по организации архитектурно-строительного проектирования НЕ относятся к должностным согласно положениям Градостроительного кодекса РФ?","options":[{"text":"Приёмка результатов работ по подготовке проектной документации","ok":false},{"text":"Согласование результатов работ по подготовке проектной документации","ok":false},{"text":"Утверждение заданий на проектирование объекта капитального строительства","ok":false},{"text":"Подготовка и согласование договоров подряда на выполнение проектно-изыскательских работ","ok":true},{"text":"Утверждение подтверждения соответствия вносимых в проектную документацию изменений установленным требованиям","ok":false}],"need":1},{"n":147,"type":"single","q":"К должностным обязанностям каких специалистов относится утверждение подтверждения соответствия изменений, вносимых в проектную документацию, получившую положительное заключение экспертизы проектной документации?","options":[{"text":"специалистов по организации строительства","ok":false},{"text":"специалистов по организации архитектурно-строительного проектирования","ok":true},{"text":"специалистов технического заказчика","ok":false},{"text":"специалистов по организации экспертизы проектной документации","ok":false}],"need":1},{"n":148,"type":"single","q":"Какая из нижеперечисленных обязанностей НЕ относится к должностной обязанности специалиста по организации архитектурно-строительного проектирования?","options":[{"text":"утверждение заданий на проектирование объекта капитального строительства","ok":false},{"text":"приемка результатов работ по подготовке проектной документации","ok":false},{"text":"утверждение проектной документации","ok":false},{"text":"утверждение в соответствии с требованиями законодательства подтверждения соответствия вносимых в проектную документацию изменений","ok":false},{"text":"подписание акта приёмки объекта капитального строительства","ok":true}],"need":1},{"n":149,"type":"multi","q":"Какие трудовые функции входят в профессиональный стандарт \"Архитектор\" для 7 уровня квалификации?","options":[{"text":"руководство работниками и операционное управление персоналом творческого коллектива и/или архитектурного подразделения организации","ok":true},{"text":"оказание консультационных услуг и выполнение проектных работ на стадии реализации объектов капитального строительства","ok":true},{"text":"Руководство проектно-изыскательскими работами, в том числе оказание экспертно-консультативных услуг на предпроектном этапе проектирования объекта капитального строительства","ok":true},{"text":"графическое и текстовое оформление проектной и рабочей документации по разработанным отдельным архитектурным, в том числе объёмным и планировочным, решениям","ok":false},{"text":"управление процессами архитектурно-строительного проектирования объектов капитального строительства в организации (структурном подразделении)","ok":false}],"need":3},{"n":150,"type":"multi","q":"Назовите применяемые на практике методы обучения.","options":[{"text":"Наставничество и коучинг","ok":true},{"text":"Моделирование роли лидера","ok":true},{"text":"Обучение на рабочем месте/ без отрыва от производства","ok":true},{"text":"Менторство","ok":true},{"text":"Тестирование","ok":false},{"text":"Практический экзамен","ok":false}],"need":4}]</script>
+<script>
+(function(){
+"use strict";
+const QS = JSON.parse(document.getElementById('qdata').textContent);
+const LET = "АБВГДЕЖЗИК".split("");
+const FINE = !!(window.matchMedia && matchMedia('(pointer:fine)').matches);
+const $ = id => document.getElementById(id);
+const store = {
+  get(){ try{ return JSON.parse(localStorage.getItem('gap7')||'{}'); }catch(e){ return {}; } },
+  set(v){ try{ localStorage.setItem('gap7', JSON.stringify(v)); }catch(e){} }
+};
+/* last question answered in "все подряд", so the run can be resumed */
+const mark = {
+  get(){ try{ return parseInt(localStorage.getItem('gap7pos')||'0',10)||0; }catch(e){ return 0; } },
+  set(v){ try{ localStorage.setItem('gap7pos', String(v)); }catch(e){} }
+};
+
+let S = { mode:'all', queue:[], i:0, score:0, answered:false, pick:null, order:[], done:[] };
+
+/* ---------- helpers ---------- */
+const norm = s => (s||'').toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9 ]/gi,' ')
+                  .replace(/\s+/g,' ').trim();
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const TAG = { single:'Один ответ', multi:'Несколько ответов', fill:'Вставьте слово',
+              match:'Соответствие', order:'Последовательность' };
+
+/* localStorage is absent for files opened straight from Android storage — say so plainly */
+function storageWorks(){
+  try{
+    localStorage.setItem('gap7probe','1');
+    const ok = localStorage.getItem('gap7probe')==='1';
+    localStorage.removeItem('gap7probe');
+    return ok;
+  }catch(e){ return false; }
+}
+const CAN_SAVE = storageWorks();
+
+/* ---------- lifetime stats ---------- */
+function paintStats(){
+  $('noStore').hidden = CAN_SAVE;
+  const done = mark.get();
+  const r = $('resumeBtn');
+  if(CAN_SAVE && done && done < 150){
+    r.hidden = false;
+    r.innerHTML = 'Продолжить с ' + (done+1) + '-го задания<small>в прошлый раз вы дошли до ' + done + '-го</small>';
+  } else r.hidden = true;
+  const st = store.get(), seen = Object.keys(st).length;
+  const ok = Object.values(st).filter(Boolean).length;
+  $('stSeen').textContent = seen; $('stOk').textContent = ok; $('stBad').textContent = seen-ok;
+  const wrong = Object.keys(st).filter(k=>!st[k]);
+  $('modeWrong').disabled = wrong.length===0;
+  $('wrongCnt').textContent = wrong.length
+    ? `Заданий с ошибкой: ${wrong.length}. Пройти их заново.`
+    : 'Пока нет сохранённых ошибок.';
+}
+function remember(n, ok){ const st=store.get(); st[n]=ok; store.set(st); }
+
+/* ---------- navigation ---------- */
+function show(which){
+  $('scrStart').hidden = which!=='start';
+  $('scrQuiz').hidden  = which!=='quiz';
+  $('scrResult').hidden= which!=='result';
+  const live = which==='quiz';
+  ['chipMode','chipProg','chipScore','barWrap','quitBtn'].forEach(id=>{ $(id).hidden = !live; });
+  if(which!=='start'){
+    $('picker').hidden = true;
+    $('modeAll').classList.remove('open');
+    $('modeAll').setAttribute('aria-expanded','false');
+  }
+}
+function start(mode, from){
+  let q, at = 0;
+  if(mode==='exam')        q = shuffle(QS).slice(0,40);
+  else if(mode==='shuffle')q = shuffle(QS);
+  else if(mode==='wrong'){ const st=store.get(); const bad=Object.keys(st).filter(k=>!st[k]).map(Number);
+                           q = QS.filter(x=>bad.includes(x.n)); }
+  else { q = QS.slice(); at = clampNum(from||1) - 1; }
+  if(!q.length) return;
+  S = { mode, queue:q, i:at, score:0, answered:false, pick:null, order:[], done:[] };
+  $('chipMode').textContent = mode==='exam' ? 'Экзамен · порог 30'
+    : mode==='wrong' ? 'Работа над ошибками' : mode==='shuffle' ? 'Вперемешку'
+    : at ? 'Все подряд · с ' + (at+1) + '-го' : 'Все подряд';
+  $('pAll').textContent = q.length;
+  show('quiz'); render();
+}
+const clampNum = v => Math.min(150, Math.max(1, parseInt(v,10) || 1));
+
+/* ---------- "start from" picker ---------- */
+function syncPicker(v){
+  const n = clampNum(v);
+  $('fromNum').value = n; $('fromRange').value = n;
+  $('goFrom').textContent = 'Начать с ' + n + '-го';
+}
+function buildJumps(){
+  const box = $('jumps'); box.innerHTML='';
+  const done = mark.get();
+  if(done && done < 150){
+    const c = el('button','jump cont'); c.type='button';
+    c.textContent = '▸ продолжить с ' + (done+1) + '-го';
+    c.addEventListener('click', ()=> syncPicker(done+1));
+    box.appendChild(c);
+  }
+  [1,21,41,61,81,101,121,141].forEach(n=>{
+    const c = el('button','jump'); c.type='button'; c.textContent = n;
+    c.addEventListener('click', ()=> syncPicker(n));
+    box.appendChild(c);
+  });
+}
+function togglePicker(){
+  const p = $('picker'), open = p.hidden;
+  p.hidden = !open;
+  $('modeAll').classList.toggle('open', open);
+  $('modeAll').setAttribute('aria-expanded', open ? 'true' : 'false');
+  if(open){
+    const done = mark.get();
+    syncPicker(done && done < 150 ? done+1 : 1);
+    buildJumps();
+    p.scrollIntoView({block:'nearest', behavior:'smooth'});
+  }
+}
+
+/* ---------- render ---------- */
+function render(){
+  const q = S.queue[S.i];
+  S.answered=false; S.pick = (q.type==='multi') ? [] : null; S.order=[];
+  $('pNow').textContent = S.i+1; $('pScore').textContent = S.score;
+  $('bar').style.width = (S.i/S.queue.length*100)+'%';
+  $('qNum').textContent = 'Задание ' + q.n;
+  $('qTag').textContent = TAG[q.type] + (q.type==='multi' ? ' · '+q.need : '');
+  $('qText').textContent = q.q;
+  $('qExtra').innerHTML = '';
+  $('verdict').className = 'verdict'; $('verdict').innerHTML='';
+  $('nextBtn').hidden = true; $('checkBtn').hidden = true; $('checkBtn').disabled = true;
+  $('hint').textContent = '';
+  const body = $('qBody'); body.innerHTML='';
+
+  if(q.type==='single' || q.type==='multi'){
+    const box = el('div','opts');
+    q.options.forEach((o,i)=>{
+      const b = el('button','opt'); b.type='button'; b.dataset.i=i;
+      b.innerHTML = `<span class="ltr">${LET[i]||i+1}</span><span class="lbl"></span><span class="mark"></span>`;
+      b.querySelector('.lbl').textContent = o.text;
+      b.addEventListener('click', ()=> pickOption(i));
+      box.appendChild(b);
+    });
+    body.appendChild(box);
+    if(q.type==='multi'){
+      $('checkBtn').hidden=false;
+      $('hint').textContent = `Отметьте вариантов: ${q.need}`;
+    } else {
+      $('hint').textContent = FINE ? 'Клавиши 1–9 тоже работают' : '';
+    }
+  }
+
+  if(q.type==='fill'){
+    const s = el('div','sentence');
+    s.innerHTML = q.sentence.replace('_____','<u>_____</u>');
+    $('qExtra').appendChild(s);
+    const f = el('div','fill');
+    const inp = document.createElement('input');
+    inp.id='fillInput'; inp.type='text'; inp.autocomplete='off'; inp.spellcheck=false;
+    inp.placeholder='Введите пропущенное';
+    inp.addEventListener('input', ()=>{ $('checkBtn').disabled = !inp.value.trim(); });
+    f.appendChild(inp); body.appendChild(f);
+    $('checkBtn').hidden=false;
+    setTimeout(()=>inp.focus(),60);
+  }
+
+  if(q.type==='match'){
+    const box = el('div','');
+    q.left.forEach((L,i)=>{
+      const row = el('div','matchrow'); row.dataset.i=i;
+      const p = document.createElement('p'); p.textContent = L;
+      const sel = document.createElement('select'); sel.id = 'm'+i;
+      sel.innerHTML = '<option value="">— выберите —</option>' +
+        q.right.map((R,j)=>`<option value="${j}"></option>`).join('') +
+        (q.map.includes(null) ? '<option value="-1">нет соответствия</option>' : '');
+      [...sel.options].forEach((op,k)=>{ if(k>0 && op.value!=='-1') op.textContent = q.right[+op.value]; });
+      sel.addEventListener('change', checkReady);
+      row.appendChild(p); row.appendChild(sel); box.appendChild(row);
+    });
+    body.appendChild(box);
+    $('checkBtn').hidden=false;
+    $('hint').textContent = 'Сопоставьте каждую строку';
+  }
+
+  if(q.type==='order'){
+    const box = el('div','ord');
+    q.items.forEach(it=>{
+      const b = el('button','ordit'); b.type='button'; b.dataset.n=it.n;
+      b.innerHTML = `<span class="pos">·</span><span class="lbl"></span><span class="was"></span>`;
+      b.querySelector('.lbl').textContent = it.text;
+      b.addEventListener('click', ()=> pickOrder(it.n));
+      box.appendChild(b);
+    });
+    body.appendChild(box);
+    const r = el('div','actions');
+    const rb = el('button','btn ghost'); rb.type='button'; rb.textContent='Сбросить порядок';
+    rb.addEventListener('click', ()=>{ S.order=[]; paintOrder(); });
+    r.appendChild(rb); body.appendChild(r);
+    $('checkBtn').hidden=false;
+    $('hint').textContent = 'Нажимайте пункты в нужном порядке';
+  }
+}
+function el(tag,cls){ const e=document.createElement(tag); if(cls) e.className=cls; return e; }
+
+/* ---------- interaction ---------- */
+function pickOption(i){
+  if(S.answered) return;
+  const q = S.queue[S.i], nodes = [...document.querySelectorAll('.opt')];
+  if(q.type==='single'){
+    S.pick=i; nodes.forEach((n,k)=> n.classList.toggle('sel', k===i));
+    setTimeout(()=>reveal(), 550);
+  } else {
+    const at = S.pick.indexOf(i);
+    if(at>=0) S.pick.splice(at,1);
+    else { if(S.pick.length>=q.need) return; S.pick.push(i); }
+    nodes.forEach((n,k)=> n.classList.toggle('sel', S.pick.includes(k)));
+    $('hint').textContent = `Отмечено ${S.pick.length} из ${q.need}`;
+    $('checkBtn').disabled = S.pick.length!==q.need;
+  }
+}
+function pickOrder(n){
+  if(S.answered) return;
+  const at = S.order.indexOf(n);
+  if(at>=0) S.order.splice(at,1); else S.order.push(n);
+  paintOrder();
+}
+function paintOrder(){
+  const q=S.queue[S.i];
+  document.querySelectorAll('.ordit').forEach(b=>{
+    const n=+b.dataset.n, at=S.order.indexOf(n);
+    b.classList.toggle('picked', at>=0);
+    b.querySelector('.pos').textContent = at>=0 ? at+1 : '·';
+  });
+  $('checkBtn').disabled = S.order.length !== q.items.length;
+  $('hint').textContent = `Выбрано ${S.order.length} из ${q.items.length}`;
+}
+function checkReady(){
+  const q=S.queue[S.i];
+  const all = q.left.every((_,i)=> $('m'+i).value !== '');
+  $('checkBtn').disabled = !all;
+}
+
+/* ---------- reveal ---------- */
+function reveal(){
+  if(S.answered) return;
+  S.answered = true;
+  const q = S.queue[S.i];
+  let ok = false, detail = '';
+
+  if(q.type==='single' || q.type==='multi'){
+    const picks = q.type==='single' ? [S.pick] : S.pick;
+    const right = q.options.map((o,i)=>o.ok?i:-1).filter(i=>i>=0);
+    ok = right.length===picks.length && right.every(i=>picks.includes(i));
+    document.querySelectorAll('.opt').forEach((n,i)=>{
+      n.disabled = true; n.classList.remove('sel');
+      const isRight = q.options[i].ok, chosen = picks.includes(i);
+      if(isRight && chosen){ n.classList.add('ok'); n.querySelector('.mark').textContent='верно'; }
+      else if(!isRight && chosen){ n.classList.add('bad'); n.querySelector('.mark').textContent='ошибка'; }
+      else if(isRight){ n.classList.add('miss'); n.querySelector('.mark').textContent='верный ответ'; }
+    });
+    if(!ok) detail = 'Правильно: ' + right.map(i=>LET[i]).join(', ');
+  }
+
+  if(q.type==='fill'){
+    const val = $('fillInput').value;
+    ok = norm(val)===norm(q.answer);
+    $('fillInput').disabled = true;
+    $('fillInput').style.borderColor = ok ? 'var(--ok)' : 'var(--bad)';
+    detail = 'Ответ: ' + q.answer;
+  }
+
+  if(q.type==='match'){
+    ok = true;
+    q.left.forEach((_,i)=>{
+      const sel=$('m'+i), row=sel.closest('.matchrow');
+      const want = q.map[i]===null ? -1 : q.map[i];
+      const got = parseInt(sel.value,10);
+      sel.disabled = true;
+      if(got===want) row.classList.add('ok');
+      else{
+        ok=false; row.classList.add('bad');
+        const fix=el('p','fix');
+        fix.textContent = '→ ' + (want===-1 ? 'нет соответствия' : q.right[want]);
+        row.appendChild(fix);
+      }
+    });
+  }
+
+  if(q.type==='order'){
+    ok = S.order.every((n,i)=> n===q.key[i]);
+    const place = {}; q.key.forEach((n,i)=> place[n]=i+1);
+    document.querySelectorAll('.ordit').forEach(b=>{
+      const n=+b.dataset.n, mine=S.order.indexOf(n)+1;
+      b.disabled=true; b.classList.remove('picked');
+      b.classList.add(mine===place[n] ? 'ok' : 'bad');
+      b.querySelector('.pos').textContent = mine;
+      if(mine!==place[n]) b.querySelector('.was').textContent = 'верно: '+place[n];
+    });
+    if(!ok) detail = 'Верный порядок: ' + q.key.join(', ');
+  }
+
+  if(ok) S.score++;
+  S.done.push({n:q.n, ok});
+  remember(q.n, ok);
+  if(S.mode==='all') mark.set(q.n);
+  $('pScore').textContent = S.score;
+
+  const v = $('verdict');
+  v.className = 'verdict show ' + (ok?'good':'poor');
+  v.innerHTML = `<b>${ok?'Верно':'Неверно'}</b>` + (detail?`<span>${detail}</span>`:'');
+  $('checkBtn').hidden = true;
+  $('nextBtn').hidden = false;
+  $('nextBtn').textContent = (S.i+1 < S.queue.length) ? 'Дальше' : 'Итоги';
+  $('nextBtn').focus();
+  $('hint').textContent = '';
+}
+
+function next(){
+  if(S.i+1 < S.queue.length){ S.i++; render(); }
+  else finish();
+}
+
+/* ---------- result ---------- */
+function finish(){
+  const total = S.done.length || S.queue.length, sc = S.score, pct = Math.round(sc/total*100);
+  $('rScore').textContent = sc + ' / ' + total;
+  const pass = pct>=75;
+  const line = $('rVerdict');
+  line.className = 'verdictline ' + (pass?'pass':'fail');
+  line.textContent = S.mode==='exam'
+    ? (pass ? `${pct}% — допуск к практическому этапу` : `${pct}% — порог 30 баллов не набран`)
+    : `${pct}% правильных ответов` + (pass ? ' — выше порога 75%' : ' — ниже порога 75%');
+  $('rTitle').textContent = pass ? 'Порог пройден' : 'Порог не пройден';
+
+  const missed = S.done.filter(d=>!d.ok).map(d=>d.n);
+  const box = $('rMiss'); box.innerHTML='';
+  if(missed.length){
+    const h = el('p','hint'); h.textContent = 'Задания с ошибкой — нажмите номер, чтобы разобрать его:';
+    const row = el('div','misses');
+    missed.forEach(n=>{
+      const c = el('button','miss-chip'); c.type='button'; c.textContent = '№'+n;
+      c.addEventListener('click', ()=>{
+        S = { mode:'wrong', queue:QS.filter(x=>x.n===n), i:0, score:0, answered:false, pick:null, order:[], done:[] };
+        $('chipMode').textContent='Разбор задания'; $('pAll').textContent=1;
+        show('quiz'); render();
+      });
+      row.appendChild(c);
+    });
+    box.appendChild(h); box.appendChild(row);
+  }
+  $('againWrong').hidden = missed.length===0;
+  $('againWrong').onclick = ()=>{
+    S = { mode:'wrong', queue:QS.filter(x=>missed.includes(x.n)), i:0, score:0, answered:false,
+          pick:null, order:[], done:[] };
+    $('chipMode').textContent='Работа над ошибками'; $('pAll').textContent=S.queue.length;
+    show('quiz'); render();
+  };
+  paintStats();
+  show('result');
+}
+
+/* ---------- wiring ---------- */
+document.querySelectorAll('.mode').forEach(b=> b.addEventListener('click', ()=>{
+  if(b.dataset.mode==='all'){ togglePicker(); return; }
+  start(b.dataset.mode);
+}));
+$('resumeBtn').addEventListener('click', ()=> start('all', mark.get()+1));
+$('fromRange').addEventListener('input', e=> syncPicker(e.target.value));
+$('fromNum').addEventListener('input', e=>{
+  const raw = e.target.value;
+  if(raw==='') { $('goFrom').textContent = 'Начать'; return; }
+  syncPicker(raw);
+});
+$('fromNum').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); $('goFrom').click(); } });
+$('goFrom').addEventListener('click', ()=>{
+  const n = clampNum($('fromNum').value);
+  $('picker').hidden = true;
+  $('modeAll').classList.remove('open');
+  $('modeAll').setAttribute('aria-expanded','false');
+  start('all', n);
+});
+$('checkBtn').addEventListener('click', reveal);
+$('nextBtn').addEventListener('click', next);
+$('quitBtn').addEventListener('click', ()=>{ paintStats(); show('start'); });
+$('homeBtn').addEventListener('click', ()=>{ paintStats(); show('start'); });
+$('resetBtn').addEventListener('click', ()=>{
+  store.set({}); mark.set(0); paintStats();
+  if(!$('picker').hidden){ syncPicker(1); buildJumps(); }
+});
+document.addEventListener('keydown', e=>{
+  if($('scrQuiz').hidden) return;
+  if(e.key==='Enter'){
+    if(!$('nextBtn').hidden){ e.preventDefault(); next(); }
+    else if(!$('checkBtn').hidden && !$('checkBtn').disabled){ e.preventDefault(); reveal(); }
+    return;
+  }
+  if(/^[1-9]$/.test(e.key) && document.activeElement.tagName!=='INPUT'
+     && document.activeElement.tagName!=='SELECT'){
+    const q=S.queue[S.i];
+    if(q && (q.type==='single'||q.type==='multi')){ const i=+e.key-1; if(i<q.options.length) pickOption(i); }
+  }
+});
+
+paintStats();
+show('start');
+try{
+  if(window.claude && window.claude.hot && window.claude.hot.snapshot)
+    window.claude.hot.snapshot(()=>({}));
+}catch(e){}
+})();
+</script>
+
+<script>
+if('serviceWorker' in navigator)
+  addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
